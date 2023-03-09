@@ -1,0 +1,51 @@
+﻿@using Rigutins.MyTranscripts.Server.Services;
+@using Microsoft.Identity.Web
+@using Microsoft.Graph
+
+@inject IUserService UserService
+@inject MicrosoftIdentityConsentAndConditionalAccessHandler ConsentHandler
+
+<AuthorizeView>
+    <Authorized>
+        <div class="dropdown">
+            <button class="btn" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown"
+                    data-bs-display="static" aria-haspopup="true" aria-expanded="@IsExpanded" @onclick="ToggleMenu">
+                <ProfilePicture />
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-lg-start @ShowNotificationsClass"
+                aria-labelledby="dropdownMenuButton"
+                style="position: absolute; will-change: transform; transform: translate3d(-96px, 0px, 0px);">
+                <li>
+                    <h6 class="dropdown-header">@UserName</h6>
+                </li>
+                <li class="dropdown-item text-dark"><a class="text-dark" href="MicrosoftIdentity/Account/SignOut">Log out</a></li>
+            </ul>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <a href="MicrosoftIdentity/Account/SignIn">Log in</a>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    User? user;
+    string profileImage = string.Empty;
+    string UserName => user == null ? string.Empty : user.DisplayName;
+
+    private bool IsExpanded { get; set; } = false;
+    private string ShowNotificationsClass => IsExpanded ? "show" : "";
+
+    private void ToggleMenu() {
+        IsExpanded = !IsExpanded;
+    }
+
+    protected override async Task OnInitializedAsync() {
+        try {
+            user = await UserService.GetMyUserDetailsAsync();
+            profileImage = await UserService.GetProfilePictureAsync();
+        }
+        catch (Exception ex) {
+            ConsentHandler.HandleException(ex);
+        }
+    }
+}

@@ -1,0 +1,31 @@
+@using Rigutins.MyTranscripts.Server.Services;
+@using Microsoft.Identity.Web
+@inject IUserService UserService
+@inject MicrosoftIdentityConsentAndConditionalAccessHandler ConsentHandler
+
+@if (profileImage != string.Empty)
+{
+    <img src="@profileImage" alt="Profile picture" class="img-fluid rounded-circle" width="34" height="34" />
+}
+else
+{
+    <div class="rounded-circle profile-placeholder">
+        <span class="oi oi-person" title="person"></span>
+    </div>
+}
+
+@code {
+    string profileImage = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            profileImage = await UserService.GetProfilePictureAsync();
+        }
+        catch (Exception ex)
+        {
+            ConsentHandler.HandleException(ex);
+        }
+    }
+}
