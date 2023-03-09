@@ -1,0 +1,12 @@
+﻿@foreach (var position in Enum.GetValues<ToastPosition>())
+{
+    @if (ToastState.Toasts.Any())
+    {
+        <div class="blazor-toast-container @GetPositionClass(position)">
+            @foreach (var toast in ToastState.Toasts.Where(t => t.Position == position).OrderBy(x => x.Timestamp))
+            {
+                <Toast ToastInstance="toast" />
+            }
+        </div>
+    }
+}

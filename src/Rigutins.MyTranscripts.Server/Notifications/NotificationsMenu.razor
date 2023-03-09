@@ -1,0 +1,82 @@
+@implements IDisposable
+
+@inject NotificationsState NotificationsState
+@inject ISpeechRecognitionService SpeechRecognitionService
+
+<div class="dropdown">
+    <button class="btn btn-light" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true"
+            aria-expanded="@IsExpanded" @onclick="ToggleNotifications">
+        <span class="oi oi-bell"></span>
+        @if (NotificationsCount > 0) {
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                @NotificationsCount
+                <span class="visually-hidden">notifications</span>
+            </span>
+        }
+    </button>
+    <ul class="dropdown-menu @ShowNotificationsClass" aria-labelledby="dropdownMenuButton" style="position: absolute; will-change: transform; transform: translate3d(-83px, 0px, 0px);">
+        @if (NotificationsCount > 0) {
+            @foreach (var notification in Notifications) {
+                <li class="dropdown-item">
+                    <span class="oi oi-@(notification.Type.ToString().ToLower())"></span>
+                    @notification.Message
+                    <span class="oi oi-circle-x float-right" @onclick="() => CloseNotification(notification)"></span>
+                </li>
+            }
+        }
+        else {
+            <li class="dropdown-item">
+                <i>
+                    No notifications
+                </i>
+            </li>
+        }
+    </ul>
+</div>
+
+@code {
+    private bool IsExpanded { get; set; } = false;
+    private string ShowNotificationsClass => IsExpanded ? "show" : "";
+    private List<Notification> Notifications => NotificationsState.Notifications;
+    private int NotificationsCount => Notifications.Count;
+
+    private void ToggleNotifications() {
+        IsExpanded = !IsExpanded;
+    }
+
+    protected override Task OnInitializedAsync() {
+        SpeechRecognitionService.RecognitionStarted += OnSpeechRecognitionStarted;
+        SpeechRecognitionService.RecognitionCompleted += OnSpeechRecognitionStopped;
+
+        return base.OnInitializedAsync();
+    }
+
+    public void Dispose() {
+        SpeechRecognitionService.RecognitionStarted -= OnSpeechRecognitionStarted;
+        SpeechRecognitionService.RecognitionCompleted -= OnSpeechRecognitionStopped;
+    }
+
+    private void OnSpeechRecognitionStarted() {
+        InvokeAsync(() => {
+            NotificationsState.AddNotification(new Notification {
+                    Message = "Speech recognition started",
+                    Type = NotificationType.Info,
+                });
+            StateHasChanged();
+        });
+    }
+
+    private void OnSpeechRecognitionStopped() {
+        InvokeAsync(() => {
+            NotificationsState.AddNotification(new Notification {
+                    Message = "Speech recognition stopped",
+                    Type = NotificationType.Info,
+                });
+            StateHasChanged();
+        });
+    }
+
+    private void CloseNotification(Notification notification) {
+        NotificationsState.RemoveNotification(notification);
+    }
+}

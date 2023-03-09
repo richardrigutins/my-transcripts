@@ -1,0 +1,14 @@
+﻿<div class="blazor-toast @ToastInstance.CssClass @ToastSettings.AdditionalClasses" role="alert">
+    @if (!string.IsNullOrWhiteSpace(ToastSettings.IconClass))
+    {
+        <div class="blazor-toast-icon">
+            <i class="@ToastSettings.IconClass" aria-hidden="true"></i>
+        </div>
+    }
+    <div class="blazor-toast-body">
+        <p class="blazor-toast-message d-flex justify-content-between">
+            @Message
+            <button role="button" class="btn-close" aria-label="Close" @onclick=@Close />
+        </p>
+    </div>
+</div>
