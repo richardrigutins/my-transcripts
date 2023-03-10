@@ -1,9 +1,36 @@
 ﻿@page "/"
 
+@inject IOneDriveService OneDriveService
+
 <PageTitle>MyTranscripts</PageTitle>
 
-<h1>Hello, world!</h1>
+<h1 class="mb-4">My transcripts</h1>
 
-Welcome to your new app.
+<div class="row">
+    @foreach (var file in Files) {
+        <div class="col-xl-3 col-sm-6 mb-4">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5 class="card-title">@file.Name</h5>
+                    <p class="mt-2 text-muted card-subtitle">
+                        Generated on @file.CreatedDateTime
+                    </p>
+                </div>
+                <hr class="m-0" />
+                <div class="card-body">
+                    <a href="@file.WebUrl" class="card-link stretched-link text-decoration-none" target="_blank">Open in OneDrive</a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+@code {
+    private DriveItem? ApplicationFolder { get; set; }
+    private List<DriveItem> Files { get; set; } = new();
+
+    protected override async Task OnInitializedAsync() {
+        ApplicationFolder = await OneDriveService.GetApplicationFolderAsync();
+        Files = await OneDriveService.GetFolderItemsAsync(ApplicationFolder!.Id);
+    }
+}
