@@ -1,6 +1,7 @@
 ﻿@page "/"
 
 @inject IOneDriveService OneDriveService
+@inject NavigationManager NavigationManager
 
 <PageTitle>MyTranscripts</PageTitle>
 
@@ -10,7 +11,7 @@
 
 @if (Loading) {
     <div class="row py-5">
-        <Spinner ColorClass="text-danger" Size="40px" />
+        <Spinner ColorClass="text-primary" Size="40px" />
     </div>
 }
 else {
@@ -34,6 +35,12 @@ else {
     </div>
 }
 
+<div class="position-fixed sticky-bottom m-5" style="bottom: 0; right: 0;">
+    <button type="button" class="btn btn-primary btn-lg rounded-circle" style="height: 60px; width:60px;" @onclick="NavigateToTranscribe">
+        <i class="oi oi-plus" aria-hidden="true" data-content="transcribe"></i>
+    </button>
+</div>
+
 @code {
     private DriveItem? ApplicationFolder { get; set; }
     private List<DriveItem> Files { get; set; } = new();
@@ -55,5 +62,9 @@ else {
         finally {
             Loading = false;
         }
+    }
+
+    private void NavigateToTranscribe() {
+        NavigationManager.NavigateTo("/transcribe");
     }
 }
