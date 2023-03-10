@@ -7,7 +7,14 @@
 
     <ul class="nav col-auto justify-content-center">
         <li>
-            <a class="nav-link px-2 link-dark mt-1 mx-2" href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
+            <NavLink class="nav-link px-2 link-dark mt-1 mx-2" href="" Match="NavLinkMatch.All" title="Home">
+                <span class="oi oi-home" aria-hidden="true"></span>
+            </NavLink>
+        </li>
+        <li>
+            <NavLink class="nav-link px-2 link-dark mt-1 mx-2" href="about" title="About">
+                <span class="oi oi-question-mark" aria-hidden="true"></span>
+            </NavLink>
         </li>
         <li>
             <LoginDisplay />

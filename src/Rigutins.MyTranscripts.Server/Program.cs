@@ -3,7 +3,6 @@ using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
 using Rigutins.MyTranscripts.Server.Data;
 using Rigutins.MyTranscripts.Server.Notifications;
-using Rigutins.MyTranscripts.Server.Options;
 using Rigutins.MyTranscripts.Server.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,8 +12,6 @@ builder.Configuration.TryAddAzureKeyVault(builder.Configuration["KeyVaultName"])
 
 // Add services to the container.
 var initialScopes = builder.Configuration["DownstreamApi:Scopes"]?.Split(' ');
-
-SpeechRecognitionOptions? speechRecognitionOptions = builder.Configuration.GetSection("SpeechRecognition").Get<SpeechRecognitionOptions>();
 
 builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
 	.AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"))
@@ -59,6 +56,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+app.UseWebSockets();
 
 app.MapControllers();
 app.MapBlazorHub();
