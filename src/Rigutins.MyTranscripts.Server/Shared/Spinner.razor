@@ -1,0 +1,33 @@
+﻿<div class="d-flex justify-content-center">
+    <div class="@SpinnerClass" style="@SpinnerStyle" role="status"></div>
+</div>
+
+@code {
+    [Parameter]
+    public string? ColorClass { get; set; }
+
+    [Parameter]
+    public string? Size { get; set; }
+
+    private string SpinnerClass {
+        get {
+            string fullClass = "spinner-border";
+            if (ColorClass is not null) {
+                fullClass += $" {ColorClass}";
+            }
+
+            return fullClass;
+        }
+    }
+
+    private string SpinnerStyle {
+        get {
+            string fullStyle = "";
+            if (Size is not null) {
+                fullStyle += $"width: {Size}; height: {Size};";
+            }
+
+            return fullStyle;
+        }
+    }
+}

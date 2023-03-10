@@ -4,33 +4,56 @@
 
 <PageTitle>MyTranscripts</PageTitle>
 
-<h1 class="mb-4">My transcripts</h1>
+<h1 class="mb-4">
+    My transcripts
+</h1>
 
-<div class="row">
-    @foreach (var file in Files) {
-        <div class="col-xl-3 col-sm-6 mb-4">
-            <div class="card shadow">
-                <div class="card-body">
-                    <h5 class="card-title">@file.Name</h5>
-                    <p class="mt-2 text-muted card-subtitle">
-                        Generated on @file.CreatedDateTime
-                    </p>
-                </div>
-                <hr class="m-0" />
-                <div class="card-body">
-                    <a href="@file.WebUrl" class="card-link stretched-link text-decoration-none" target="_blank">Open in OneDrive</a>
+@if (Loading) {
+    <div class="row py-5">
+        <Spinner ColorClass="text-danger" Size="40px" />
+    </div>
+}
+else {
+    <div class="row">
+        @foreach (var file in Files) {
+            <div class="col-xl-3 col-sm-6 mb-4">
+                <div class="card shadow">
+                    <div class="card-body">
+                        <h5 class="card-title">@file.Name</h5>
+                        <p class="mt-2 text-muted card-subtitle">
+                            Generated on @file.CreatedDateTime
+                        </p>
+                    </div>
+                    <hr class="m-0" />
+                    <div class="card-body">
+                        <a href="@file.WebUrl" class="card-link stretched-link text-decoration-none" target="_blank">Open in OneDrive</a>
+                    </div>
                 </div>
             </div>
-        </div>
-    }
-</div>
+        }
+    </div>
+}
 
 @code {
     private DriveItem? ApplicationFolder { get; set; }
     private List<DriveItem> Files { get; set; } = new();
+    private bool Loading { get; set; } = false;
 
-    protected override async Task OnInitializedAsync() {
-        ApplicationFolder = await OneDriveService.GetApplicationFolderAsync();
-        Files = await OneDriveService.GetFolderItemsAsync(ApplicationFolder!.Id);
+    protected override Task OnInitializedAsync() {
+        return LoadFilesAsync();
+    }
+
+    private async Task LoadFilesAsync() {
+        Loading = true;
+        try {
+            ApplicationFolder = await OneDriveService.GetApplicationFolderAsync();
+            Files = await OneDriveService.GetFolderItemsAsync(ApplicationFolder!.Id);
+        }
+        catch (Exception ex) {
+            ConsentHandler.HandleException(ex);
+        }
+        finally {
+            Loading = false;
+        }
     }
 }
