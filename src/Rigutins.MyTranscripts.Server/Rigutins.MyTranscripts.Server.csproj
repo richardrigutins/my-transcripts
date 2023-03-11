@@ -28,7 +28,6 @@
 
   <ItemGroup>
     <Folder Include="Notifications\" />
-    <Folder Include="Toasts\" />
   </ItemGroup>
 
 </Project>

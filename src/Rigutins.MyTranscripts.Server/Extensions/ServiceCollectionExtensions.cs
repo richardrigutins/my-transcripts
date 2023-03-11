@@ -1,7 +1,5 @@
 ﻿using Rigutins.MyTranscripts.Server.Options;
 using Rigutins.MyTranscripts.Server.SpeechRecognition;
-using Rigutins.MyTranscripts.Server.Toasts;
-using Rigutins.MyTranscripts.Server.Toasts.Services;
 
 namespace System.Collections.Generic;
 
@@ -16,13 +14,6 @@ public static class ServiceCollectionExtensions
 	{
 		services.AddOptions<SpeechRecognitionOptions>().Configure(configureOptions);
 		services.AddScoped<ISpeechRecognitionService, AzureSpeechRecognitionService>();
-		return services;
-	}
-
-	public static IServiceCollection AddToasts(this IServiceCollection services)
-	{
-		services.AddScoped<ToastState>();
-		services.AddScoped<IToastService, ToastService>();
 		return services;
 	}
 }

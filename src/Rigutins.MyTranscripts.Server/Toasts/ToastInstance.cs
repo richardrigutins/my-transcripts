@@ -6,16 +6,19 @@ public class ToastInstance
 	public DateTime Timestamp { get; set; }
 	public string Message { get; set; }
 	public ToastSettings Settings { get; set; }
-	public ToastLevel Level { get; set; }
+	public ToastColor Color { get; set; }
 	public ToastPosition Position { get; set; }
-	public string CssClass => string.IsNullOrWhiteSpace(Settings.OverrideBaseClass) ? $"blazor-toast-{Level.ToString().ToLower()}" : Settings.OverrideBaseClass;
+	public string CssClass =>
+		string.IsNullOrWhiteSpace(Settings.OverrideBaseClass)
+			? $"blazor-toast-{Color.ToString().ToLower()}"
+			: Settings.OverrideBaseClass;
 
-	public ToastInstance(string message, ToastLevel level, ToastPosition position, ToastSettings settings)
+	public ToastInstance(string message, ToastColor color, ToastPosition position, ToastSettings settings)
 	{
 		Id = Guid.NewGuid();
 		Timestamp = DateTime.Now;
 		Message = message;
-		Level = level;
+		Color = color;
 		Position = position;
 		Settings = settings;
 	}

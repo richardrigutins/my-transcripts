@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
-using Rigutins.MyTranscripts.Server.Data;
 using Rigutins.MyTranscripts.Server.Notifications;
 using Rigutins.MyTranscripts.Server.Services;
 
@@ -32,13 +31,10 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor()
 	.AddMicrosoftIdentityConsentHandler();
 
-builder.Services.AddSingleton<WeatherForecastService>();
-
 builder.Services.AddScoped<IUserService, GraphUserService>();
 builder.Services.AddScoped<IOneDriveService, GraphOneDriveService>();
 builder.Services.AddScoped<ITodoService, GraphTodoService>();
 builder.Services.AddSpeechRecognition(builder.Configuration.GetSection("SpeechRecognition"));
-builder.Services.AddToasts();
 builder.Services.AddScoped<NotificationsState>();
 
 var app = builder.Build();

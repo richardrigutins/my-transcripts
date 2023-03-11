@@ -1,13 +1,26 @@
-﻿@inherits LayoutComponentBase
+﻿@using Rigutins.MyTranscripts.Server.Toasts;
+
+@inherits LayoutComponentBase
 
 <PageTitle>MyTranscripts</PageTitle>
 
 <div class="page">
     <main>
-        <Header />
+        <CascadingValue Value="@ToastState">
+            <CascadingValue Value="@SpeechRecognitionState">
+                <Header />
 
-        <article class="content px-4">
-            @Body
-        </article>
+                <article class="content px-4">
+                    @Body
+                </article>
+
+                <ToastContainer />
+            </CascadingValue>
+        </CascadingValue>
     </main>
 </div>
+
+@code {
+    public ToastState ToastState { get; set; } = new();
+    public SpeechRecognitionState SpeechRecognitionState { get; set; } = new();
+}

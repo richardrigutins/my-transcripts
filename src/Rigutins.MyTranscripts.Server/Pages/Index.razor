@@ -1,5 +1,7 @@
 ﻿@page "/"
 
+@inherits StatefulComponentBase
+
 @inject IOneDriveService OneDriveService
 @inject NavigationManager NavigationManager
 
@@ -65,6 +67,7 @@ else {
     }
 
     private void NavigateToTranscribe() {
+        ToastState.ShowToast($"Navigating to transcribe page at {DateTime.Now}");
         NavigationManager.NavigateTo("/transcribe");
     }
 }

@@ -4,7 +4,7 @@ namespace Rigutins.MyTranscripts.Server.Toasts.Components;
 
 public partial class ToastContainer : IDisposable
 {
-	[Inject]
+	[CascadingParameter]
 	private ToastState ToastState { get; set; } = default!;
 
 	private string GetPositionClass(ToastPosition position)
@@ -14,13 +14,11 @@ public partial class ToastContainer : IDisposable
 
 	protected override void OnInitialized()
 	{
-		ToastService.OnShow += StateHasChanged;
-		ToastService.OnHide += StateHasChanged;
+		ToastState.OnChange += StateHasChanged;
 	}
 
 	public void Dispose()
 	{
-		ToastService.OnShow -= StateHasChanged;
-		ToastService.OnHide -= StateHasChanged;
+		ToastState.OnChange -= StateHasChanged;
 	}
 }

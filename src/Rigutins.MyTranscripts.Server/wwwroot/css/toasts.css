@@ -20,7 +20,7 @@
 .blazor-toast {
     display: flex;
     flex-direction: row;
-    animation: fadein 0.75s;
+    animation: fadein 0.5s;
     margin-bottom: 1rem;
     padding: 1rem 1.25rem;
     color: #fff;
@@ -43,6 +43,18 @@
 .blazor-toast-error {
     background-color: var(--bs-danger);
 }
+
+.blazor-toast-light {
+    background-color: var(--bs-light);
+}
+
+.blazor-toast-dark {
+    background-color: var(--bs-dark);
+}
+
+    .blazor-toast-dark .blazor-toast-icon {
+        color: var(--bs-light);
+    }
 
 .blazor-toast-icon {
     display: flex;
