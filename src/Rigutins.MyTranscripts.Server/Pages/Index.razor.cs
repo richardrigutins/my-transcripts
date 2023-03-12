@@ -13,10 +13,10 @@ public partial class Index : IDisposable
 	[Inject]
 	IOneDriveService OneDriveService { get; init; } = default!;
 
-	[Inject] 
+	[Inject]
 	ISpeechRecognitionService SpeechRecognitionService { get; init; } = default!;
 
-	[Inject] 
+	[Inject]
 	ILogger<Index> Logger { get; init; } = default!;
 
 	private DriveItem? ApplicationFolder { get; set; }
@@ -37,16 +37,12 @@ public partial class Index : IDisposable
 	private string FileValidationErrorDisplayStyle => IsInvalidFile ? "block" : "none";
 	private bool IsStartRecognitionDisabled => SelectedFile == null || IsRecognizing;
 
-	private bool IsRecognizing { get; set; } = false;
-	private Transcript? TranscriptInProgress { get; set; }
-	private List<string> RecognizedSentences { get; init; } = new();
-	private bool ConfirmExternalNavigation => IsRecognizing;
+	private bool IsRecognizing => SpeechRecognitionState.IsRecognizing;
 
 	protected override Task OnInitializedAsync()
 	{
 		SpeechRecognitionService.RecognitionStarted += OnRecognitionStarted;
 		SpeechRecognitionService.RecognitionCompleted += OnRecognitionCompleted;
-		SpeechRecognitionService.SentenceRecognized += OnSentenceRecognized;
 		return LoadFilesAsync();
 	}
 
@@ -54,7 +50,6 @@ public partial class Index : IDisposable
 	{
 		SpeechRecognitionService.RecognitionStarted -= OnRecognitionStarted;
 		SpeechRecognitionService.RecognitionCompleted -= OnRecognitionCompleted;
-		SpeechRecognitionService.SentenceRecognized -= OnSentenceRecognized;
 	}
 
 	private async Task LoadFilesAsync()
@@ -65,9 +60,9 @@ public partial class Index : IDisposable
 			ApplicationFolder = await OneDriveService.GetApplicationFolderAsync();
 			var files = await OneDriveService.GetFolderItemsAsync(ApplicationFolder!.Id);
 			Transcripts = files.Select(MapDriveItemToTranscript).OrderByDescending(t => t.CreatedDateTime);
-			if (TranscriptInProgress != null)
+			if (SpeechRecognitionState.TranscriptInProgress != null)
 			{
-				Transcripts = Transcripts.Prepend(TranscriptInProgress);
+				Transcripts = Transcripts.Prepend(SpeechRecognitionState.TranscriptInProgress);
 			}
 		}
 		catch (Exception ex)
@@ -130,14 +125,13 @@ public partial class Index : IDisposable
 
 	private async Task StartRecognition()
 	{
-		ClearRecognition();
 		Transcript newTranscript = new()
 		{
 			Name = SelectedFile!.Name,
 			IsInProgress = true
 		};
 		Transcripts = Transcripts.Prepend(newTranscript);
-		TranscriptInProgress = newTranscript;
+		SpeechRecognitionState.TranscriptInProgress = newTranscript;
 
 		if (SelectedFile == null)
 		{
@@ -157,21 +151,6 @@ public partial class Index : IDisposable
 		});
 	}
 
-	private void ClearRecognition()
-	{
-		IsRecognizing = false;
-		TranscriptInProgress = null;
-		RecognizedSentences.Clear();
-	}
-
-	private void OnSentenceRecognized(string sentence)
-	{
-		if (!string.IsNullOrWhiteSpace(sentence))
-		{
-			RecognizedSentences.Add(sentence);
-		}
-	}
-
 
 	private void OnRecognitionStarted()
 	{
@@ -179,7 +158,6 @@ public partial class Index : IDisposable
 		{
 			try
 			{
-				IsRecognizing = true;
 				ToggleModal();
 				StateHasChanged();
 				ToastState.ShowToast("Recognition started");
@@ -197,7 +175,6 @@ public partial class Index : IDisposable
 		{
 			try
 			{
-				IsRecognizing = false;
 				LoadingModal = false;
 				StateHasChanged();
 				if (recognitionResult.Reason == SpeechRecognitionResultReason.Success)

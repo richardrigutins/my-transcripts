@@ -1,24 +1,43 @@
-﻿@using Rigutins.MyTranscripts.Server.Toasts;
+﻿@using Rigutins.MyTranscripts.Server.Pages;
+@using Rigutins.MyTranscripts.Server.Toasts;
+
+@implements IDisposable
 
 @inject ISpeechRecognitionService SpeechRecognitionService
 
-<CascadingValue Value="@ToastState">
-    <CascadingAuthenticationState>
-        <Router AppAssembly="@typeof(App).Assembly">
-            <Found Context="routeData">
-                <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
-                <FocusOnNavigate RouteData="@routeData" Selector="h1" />
-            </Found>
-            <NotFound>
-                <PageTitle>Not found</PageTitle>
-                <LayoutView Layout="@typeof(MainLayout)">
-                    <p role="alert">Sorry, there's nothing at this address.</p>
-                </LayoutView>
-            </NotFound>
-        </Router>
-    </CascadingAuthenticationState>
+<CascadingValue Value="@SpeechRecognitionState">
+    <CascadingValue Value="@ToastState">
+        <CascadingAuthenticationState>
+            <Router AppAssembly="@typeof(App).Assembly">
+                <Found Context="routeData">
+                    <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+                    <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+                </Found>
+                <NotFound>
+                    <PageTitle>Not found</PageTitle>
+                    <LayoutView Layout="@typeof(MainLayout)">
+                        <p role="alert">Sorry, there's nothing at this address.</p>
+                    </LayoutView>
+                </NotFound>
+            </Router>
+        </CascadingAuthenticationState>
+    </CascadingValue>
 </CascadingValue>
+
 
 @code {
     public ToastState ToastState { get; set; } = new();
+    public SpeechRecognitionState SpeechRecognitionState { get; set; } = new();
+
+    protected override void OnInitialized() {
+        SpeechRecognitionService.RecognitionStarted += SpeechRecognitionState.OnRecognitionStarted;
+        SpeechRecognitionService.RecognitionCompleted += SpeechRecognitionState.OnRecognitionCompleted;
+        SpeechRecognitionService.SentenceRecognized += SpeechRecognitionState.OnSentenceRecognized;
+    }
+
+    public void Dispose() {
+        SpeechRecognitionService.RecognitionStarted -= SpeechRecognitionState.OnRecognitionStarted;
+        SpeechRecognitionService.RecognitionCompleted -= SpeechRecognitionState.OnRecognitionCompleted;
+        SpeechRecognitionService.SentenceRecognized -= SpeechRecognitionState.OnSentenceRecognized;
+    }
 }
