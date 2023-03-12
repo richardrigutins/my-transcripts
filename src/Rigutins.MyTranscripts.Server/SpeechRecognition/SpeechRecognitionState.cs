@@ -3,5 +3,5 @@
 public class SpeechRecognitionState
 {
 	public bool IsRecognizing { get; set; } = false;
-	public List<string> RegognizedSentences { get; set; } = new();
+	public List<string> RecognizedSentences { get; set; } = new();
 }
