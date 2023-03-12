@@ -1,4 +1,5 @@
 ﻿@using Rigutins.MyTranscripts.Server.Toasts;
+
 <CascadingValue Value="@ToastState">
     <CascadingValue Value="@SpeechRecognitionState">
         <CascadingAuthenticationState>
@@ -18,7 +19,15 @@
     </CascadingValue>
 </CascadingValue>
 
+<NavigationLock ConfirmExternalNavigation="ConfirmExternalNavigation" />
+
 @code {
     public ToastState ToastState { get; set; } = new();
     public SpeechRecognitionState SpeechRecognitionState { get; set; } = new();
+
+    private bool ConfirmExternalNavigation {
+        get {
+            return !SpeechRecognitionState.IsRecognizing;
+        }
+    }
 }
