@@ -1,4 +1,5 @@
 ﻿@page "/"
+@using Rigutins.MyTranscripts.Server.Data;
 
 @inherits StatefulComponentBase
 
@@ -17,29 +18,27 @@
         <Spinner ColorClass="text-primary" Size="40px" />
     </div>
 }
+else if (Transcripts.Count() == 0) {
+    <div class="row">
+        <div class="col-12">
+            <p class="lead">
+                You don't have any transcripts yet.
+            </p>
+        </div>
+    </div>
+}
 else {
     <div class="row">
-        @foreach (var file in Files) {
+        @foreach (var transcript in Transcripts) {
             <div class="col-xl-3 col-sm-6 mb-4">
-                <div class="card shadow">
-                    <div class="card-body">
-                        <h5 class="card-title">@file.Name</h5>
-                        <p class="mt-2 text-muted card-subtitle">
-                            Generated on @file.CreatedDateTime
-                        </p>
-                    </div>
-                    <hr class="m-0" />
-                    <div class="card-body">
-                        <a href="@file.WebUrl" class="card-link stretched-link text-decoration-none" target="_blank">Open in OneDrive</a>
-                    </div>
-                </div>
+                <TranscriptCard Transcript="transcript" />
             </div>
         }
     </div>
 }
 
 <div class="position-fixed sticky-bottom m-5" style="bottom: 0; right: 0;">
-    <button type="button" class="btn btn-primary btn-lg rounded-circle" style="height: 60px; width:60px;" @onclick="ToggleModal" disabled="@IsRecognitionInProgress">
+    <button type="button" class="btn btn-primary btn-lg rounded-circle" style="height: 60px; width:60px;" @onclick="ToggleModal" disabled="@IsFabDisabled">
         <i class="oi oi-plus" aria-hidden="true" data-content="transcribe"></i>
     </button>
 </div>
@@ -61,7 +60,7 @@ else {
             </div>
             <div class="modal-body">
                 <div class="row">
-                    <p>Generate a transcript by uploading your audio file.</p>
+                    <p>Generate a transcript by uploading your audio file and selecting the language.</p>
                 </div>
                 <div class="row">
                     <WarningAlert Title="Note:" Body="Only .wav files are supported at the moment." />
@@ -81,7 +80,7 @@ else {
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-dismiss="modal" @onclick="ToggleModal" disabled="@IsStartRecognitionDisabled">Start</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal" @onclick="StartRecognition" disabled="@IsStartRecognitionDisabled">Start</button>
             </div>
         </div>
     </div>
@@ -91,7 +90,7 @@ else {
     private const string DefaultLanguage = "en-US";
 
     private Dictionary<string, string> Languages => new()
-            {
+                                    {
         { "en-US", "English (United States)" },
         { "en-GB", "English (United Kingdom)" },
         { "en-AU", "English (Australia)" },
@@ -110,8 +109,9 @@ else {
     };
 
     private DriveItem? ApplicationFolder { get; set; }
-    private List<DriveItem> Files { get; set; } = new();
+    private IEnumerable<Transcript> Transcripts { get; set; } = new List<Transcript>();
     private bool Loading { get; set; } = false;
+    private bool IsFabDisabled => IsRecognitionInProgress || Loading;
 
     private bool ShowModal { get; set; } = false;
     private string ModalClass => ShowModal ? "modal fade show" : "modal fade";
@@ -134,7 +134,11 @@ else {
         Loading = true;
         try {
             ApplicationFolder = await OneDriveService.GetApplicationFolderAsync();
-            Files = await OneDriveService.GetFolderItemsAsync(ApplicationFolder!.Id);
+            var files = await OneDriveService.GetFolderItemsAsync(ApplicationFolder!.Id);
+            Transcripts = files.Select(MapDriveItemToTranscript).OrderByDescending(t => t.CreatedDateTime);
+            if (SpeechRecognitionState.TranscriptInProgress != null) {
+                Transcripts = Transcripts.Prepend(SpeechRecognitionState.TranscriptInProgress);
+            }
         }
         catch (Exception ex) {
             ConsentHandler.HandleException(ex);
@@ -144,16 +148,24 @@ else {
         }
     }
 
+    private Transcript MapDriveItemToTranscript(DriveItem file) {
+        return new Transcript() {
+                Id = file.Id,
+                Name = file.Name,
+                IsInProgress = false,
+                OneDriveUrl = file.WebUrl,
+                CreatedDateTime = file.CreatedDateTime,
+            };
+    }
+
     private void ToggleModal() {
         ShowModal = !ShowModal;
         ResetModal();
     }
 
     private void OnInputFileChange(InputFileChangeEventArgs e) {
-        // Get the selected file
         var file = e.File;
 
-        // Check if file is wav
         if (file.ContentType != "audio/wav") {
             IsInvalidFile = true;
             ClearInputFileSelection();
@@ -173,5 +185,16 @@ else {
         ClearInputFileSelection();
         IsInvalidFile = false;
         SelectedLanguage = DefaultLanguage;
+    }
+
+    private void StartRecognition() {
+        SpeechRecognitionState.IsRecognizing = true;
+        Transcript newTranscript = new() {
+                Name = SelectedFile!.Name,
+                IsInProgress = true
+            };
+        Transcripts = Transcripts.Prepend(newTranscript);
+        SpeechRecognitionState.TranscriptInProgress = newTranscript;
+        ToggleModal();
     }
 }

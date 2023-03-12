@@ -1,0 +1,38 @@
+﻿@using Rigutins.MyTranscripts.Server.Data;
+
+@if (Transcript != null) {
+    <div class="card shadow">
+        <div class="card-header">
+            <h5 class="card-title">@Transcript.Name</h5>
+        </div>
+        @if (Transcript.IsInProgress) {
+            <div class="card-body">
+                <Spinner ColorClass="text-primary" Size="40px" />
+            </div>
+        }
+        else {
+            <div class="card-body">
+                <p class="mt-2 text-muted card-subtitle">
+                    Generated on @FormateCreatedDateTime(Transcript.CreatedDateTime)
+                </p>
+            </div>
+            <hr class="m-0" />
+            <div class="card-body">
+                <a href="@Transcript.OneDriveUrl" class="card-link stretched-link text-decoration-none" target="_blank">Open in OneDrive</a>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    [Parameter]
+    public Transcript? Transcript { get; set; }
+
+    private string FormateCreatedDateTime(DateTimeOffset? createdDateTime) {
+        if (createdDateTime == null) {
+            return string.Empty;
+        }
+
+        return createdDateTime.Value.ToString("yyyy-MM-dd HH:mm");
+    }
+}
