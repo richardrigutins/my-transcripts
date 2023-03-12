@@ -2,11 +2,11 @@
 
 public interface ISpeechRecognitionService
 {
+	event Action<SpeechRecognitionResult>? RecognitionCompleted;
+	event Action<string>? SentenceRecognized;
 	event Action? RecognitionStarted;
-	event Action? RecognitionCompleted;
 
 	bool IsExecuting { get; }
 
-	Task<SpeechRecognitionResult> ExecuteRecognitionAsync(byte[] fileContent, string? language = null);
-	Task<SpeechRecognitionResult> ExecuteRecognitionAsync(Stream stream, string? language = null);
+	Task<SpeechRecognitionResult> RecognizeAsync(Stream stream, string language);
 }

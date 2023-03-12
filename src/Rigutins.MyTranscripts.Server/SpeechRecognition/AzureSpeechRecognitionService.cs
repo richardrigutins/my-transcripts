@@ -7,85 +7,49 @@ namespace Rigutins.MyTranscripts.Server.SpeechRecognition;
 
 public class AzureSpeechRecognitionService : ISpeechRecognitionService
 {
-	private readonly ILogger<AzureSpeechRecognitionService> _logger;
 	private readonly SpeechRecognitionOptions _options;
 
+	public event Action<SpeechRecognitionResult>? RecognitionCompleted;
 	public event Action? RecognitionStarted;
-	public event Action? RecognitionCompleted;
+	public event Action<string>? SentenceRecognized;
 
 	public bool IsExecuting { get; private set; }
 
-	public AzureSpeechRecognitionService(ILogger<AzureSpeechRecognitionService> logger, IOptions<SpeechRecognitionOptions> options)
+	public AzureSpeechRecognitionService(IOptions<SpeechRecognitionOptions> options)
 	{
-		_logger = logger;
 		_options = options.Value;
 	}
 
-	public async Task<SpeechRecognitionResult> ExecuteRecognitionAsync(Stream stream, string? language = null)
+	public async Task<SpeechRecognitionResult> RecognizeAsync(Stream stream, string language)
 	{
-		if (IsExecuting)
+		SpeechRecognitionResult result = new()
 		{
-			return new SpeechRecognitionResult()
-			{
-				Reason = SpeechRecognitionResultReason.Error,
-				ErrorMessage = "Speech recognition is already executing."
-			};
-		}
-
-		var speechConfig = SpeechConfig.FromSubscription(_options.SubscriptionKey, _options.Region);
-		if (language != null)
-		{
-			speechConfig.SpeechRecognitionLanguage = language;
-		}
-
-		// Create an audio format for the stream.
-		var audioFormat = AudioStreamFormat.GetWaveFormatPCM(16000, 16, 1);
-
-		// Create an audio input stream from the byte array and the format.
-		var audioConfigStream = AudioInputStream.CreatePullStream(
-			new BinaryAudioStreamReader(new BinaryReader(stream)),
-			audioFormat
-		);
-
-		using var audioConfig = AudioConfig.FromStreamInput(audioConfigStream);
-		using var recognizer = new SpeechRecognizer(speechConfig, audioConfig);
-
-		return await ExecuteContinuousRecognitionAsync(recognizer);
-	}
-
-	public async Task<SpeechRecognitionResult> ExecuteRecognitionAsync(byte[] fileContent, string? language = null)
-	{
-		if (IsExecuting)
-		{
-			return new SpeechRecognitionResult()
-			{
-				Reason = SpeechRecognitionResultReason.Error,
-				ErrorMessage = "Speech recognition is already executing."
-			};
-		}
-
-		var speechConfig = SpeechConfig.FromSubscription(_options.SubscriptionKey, _options.Region);
-		if (language != null)
-		{
-			speechConfig.SpeechRecognitionLanguage = language;
-		}
-
-		using var audioConfigStream = AudioInputStream.CreatePushStream();
-		using var audioConfig = AudioConfig.FromStreamInput(audioConfigStream);
-		using var recognizer = new SpeechRecognizer(speechConfig, audioConfig);
-
-		audioConfigStream.Write(fileContent);
-
-		return await ExecuteContinuousRecognitionAsync(recognizer);
-	}
-
-	private async Task<SpeechRecognitionResult> ExecuteContinuousRecognitionAsync(SpeechRecognizer recognizer)
-	{
-		SpeechRecognitionResult result = new();
+			Reason = SpeechRecognitionResultReason.Success,
+		};
 
 		try
 		{
-			List<string> recognizedText = new();
+			if (IsExecuting)
+			{
+				result.Reason = SpeechRecognitionResultReason.Error;
+				result.ErrorMessage = "Speech recognition is already executing.";
+				return result;
+			}
+
+			var speechConfig = SpeechConfig.FromSubscription(_options.SubscriptionKey, _options.Region);
+			speechConfig.SpeechRecognitionLanguage = language;
+
+			// Create an audio format for the stream.
+			var audioFormat = AudioStreamFormat.GetWaveFormatPCM(16000, 16, 1);
+
+			// Create an audio input stream from the byte array and the format.
+			var audioConfigStream = AudioInputStream.CreatePullStream(
+				new BinaryAudioStreamReader(new BinaryReader(stream)),
+				audioFormat
+			);
+
+			using var audioConfig = AudioConfig.FromStreamInput(audioConfigStream);
+			using var recognizer = new SpeechRecognizer(speechConfig, audioConfig);
 
 			var stopRecognition = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -93,7 +57,7 @@ public class AzureSpeechRecognitionService : ISpeechRecognitionService
 			{
 				if (e.Result.Reason == ResultReason.RecognizedSpeech)
 				{
-					recognizedText.Add(e.Result.Text);
+					OnSentenceRecognized(e.Result.Text);
 				}
 				else if (e.Result.Reason == ResultReason.NoMatch)
 				{
@@ -124,27 +88,42 @@ public class AzureSpeechRecognitionService : ISpeechRecognitionService
 			};
 
 			// Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
-			IsExecuting = true;
-			RecognitionStarted?.Invoke();
 			await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+			OnRecognitionStarted();
 
 			// Waits for completion.
 			// Use Task.WaitAny to keep the task rooted.
 			Task.WaitAny(new[] { stopRecognition.Task });
 
 			await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
-
-			if (result.Reason == SpeechRecognitionResultReason.Success)
-			{
-				result.RecognizedText = recognizedText;
-			}
-
-			return result;
+		}
+		catch (Exception ex)
+		{
+			result.Reason = SpeechRecognitionResultReason.Error;
+			result.ErrorMessage = ex.ToString();
 		}
 		finally
 		{
-			IsExecuting = false;
-			RecognitionCompleted?.Invoke();
+			OnRecognitionCompleted(result);
 		}
+
+		return result;
+	}
+
+	private void OnSentenceRecognized(string text)
+	{
+		SentenceRecognized?.Invoke(text);
+	}
+
+	private void OnRecognitionStarted()
+	{
+		IsExecuting = true;
+		RecognitionStarted?.Invoke();
+	}
+
+	private void OnRecognitionCompleted(SpeechRecognitionResult result)
+	{
+		IsExecuting = false;
+		RecognitionCompleted?.Invoke(result);
 	}
 }

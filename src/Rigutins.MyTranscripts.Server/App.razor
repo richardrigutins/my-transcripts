@@ -1,33 +1,24 @@
 ﻿@using Rigutins.MyTranscripts.Server.Toasts;
 
-<CascadingValue Value="@ToastState">
-    <CascadingValue Value="@SpeechRecognitionState">
-        <CascadingAuthenticationState>
-            <Router AppAssembly="@typeof(App).Assembly">
-                <Found Context="routeData">
-                    <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
-                    <FocusOnNavigate RouteData="@routeData" Selector="h1" />
-                </Found>
-                <NotFound>
-                    <PageTitle>Not found</PageTitle>
-                    <LayoutView Layout="@typeof(MainLayout)">
-                        <p role="alert">Sorry, there's nothing at this address.</p>
-                    </LayoutView>
-                </NotFound>
-            </Router>
-        </CascadingAuthenticationState>
-    </CascadingValue>
-</CascadingValue>
+@inject ISpeechRecognitionService SpeechRecognitionService
 
-<NavigationLock ConfirmExternalNavigation="ConfirmExternalNavigation" />
+<CascadingValue Value="@ToastState">
+    <CascadingAuthenticationState>
+        <Router AppAssembly="@typeof(App).Assembly">
+            <Found Context="routeData">
+                <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+                <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+            </Found>
+            <NotFound>
+                <PageTitle>Not found</PageTitle>
+                <LayoutView Layout="@typeof(MainLayout)">
+                    <p role="alert">Sorry, there's nothing at this address.</p>
+                </LayoutView>
+            </NotFound>
+        </Router>
+    </CascadingAuthenticationState>
+</CascadingValue>
 
 @code {
     public ToastState ToastState { get; set; } = new();
-    public SpeechRecognitionState SpeechRecognitionState { get; set; } = new();
-
-    private bool ConfirmExternalNavigation {
-        get {
-            return !SpeechRecognitionState.IsRecognizing;
-        }
-    }
 }

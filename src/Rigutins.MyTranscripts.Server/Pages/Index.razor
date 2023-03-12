@@ -1,11 +1,8 @@
 ﻿@page "/"
+
 @using Rigutins.MyTranscripts.Server.Data;
 
 @inherits StatefulComponentBase
-
-@inject IOneDriveService OneDriveService
-@inject ISpeechRecognitionService SpeechRecognitionService
-@inject NavigationManager NavigationManager
 
 <PageTitle>MyTranscripts</PageTitle>
 
@@ -58,143 +55,39 @@ else {
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @onclick="ToggleModal"></button>
             </div>
-            <div class="modal-body">
-                <div class="row">
-                    <p>Generate a transcript by uploading your audio file and selecting the language.</p>
+            @if (LoadingModal) {
+                <div class="modal-body py-4">
+                    <Spinner ColorClass="text-primary" Size="40px" />
                 </div>
-                <div class="row">
-                    <WarningAlert Title="Note:" Body="Only .wav files are supported at the moment." />
-                </div>
-                <div class="input-group mb-3">
-                    <select class="form-select" aria-label="Select language" @bind="SelectedLanguage">
-                        @foreach (var language in Languages) {
-                            <option value="@language.Key">@language.Value</option>
-                        }
-                    </select>
-                </div>
-                <div class="input-group has-validation">
-                    <InputFile class="form-control" OnChange="OnInputFileChange" @key=@(InputFileId) accept="audio/wav" required />
-                    <div class="invalid-feedback" style="display: @FileValidationErrorDisplayStyle">
-                        Please select a valid file.
+            }
+            else {
+                <div class="modal-body">
+                    <div class="row">
+                        <p>Generate a transcript by uploading your audio file and selecting the language.</p>
+                    </div>
+                    <div class="row">
+                        <WarningAlert Title="Note:" Body="Only .wav files are supported at the moment." />
+                    </div>
+                    <div class="input-group mb-3">
+                        <select class="form-select" aria-label="Select language" @bind="SelectedLanguage">
+                            @foreach (var language in Language.Languages) {
+                                <option value="@language.Key">@language.Value</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="input-group has-validation">
+                        <InputFile class="form-control" OnChange="OnInputFileChange" @key=@(InputFileId) accept="audio/wav" required />
+                        <div class="invalid-feedback" style="display: @FileValidationErrorDisplayStyle">
+                            Please select a valid file.
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-dismiss="modal" @onclick="StartRecognition" disabled="@IsStartRecognitionDisabled">Start</button>
-            </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" @onclick="StartRecognition" disabled="@IsStartRecognitionDisabled">Start</button>
+                </div>
+            }
         </div>
     </div>
 </div>
 
-@code {
-    private const string DefaultLanguage = "en-US";
-
-    private Dictionary<string, string> Languages => new()
-                                    {
-        { "en-US", "English (United States)" },
-        { "en-GB", "English (United Kingdom)" },
-        { "en-AU", "English (Australia)" },
-        { "en-CA", "English (Canada)" },
-        { "en-IN", "English (India)" },
-        { "de-DE", "German (Germany)" },
-        { "es-ES", "Spanish (Spain)" },
-        { "es-MX", "Spanish (Mexico)" },
-        { "fr-FR", "French (France)" },
-        { "it-IT", "Italian (Italy)" },
-        { "ja-JP", "Japanese (Japan)" },
-        { "pt-BR", "Portuguese (Brazil)" },
-        { "zh-CN", "Chinese (China)" },
-        { "zh-HK", "Chinese (Hong Kong)" },
-        { "zh-TW", "Chinese (Taiwan)" }
-    };
-
-    private DriveItem? ApplicationFolder { get; set; }
-    private IEnumerable<Transcript> Transcripts { get; set; } = new List<Transcript>();
-    private bool Loading { get; set; } = false;
-    private bool IsFabDisabled => IsRecognitionInProgress || Loading;
-
-    private bool ShowModal { get; set; } = false;
-    private string ModalClass => ShowModal ? "modal fade show" : "modal fade";
-    private string ModalDisplayType => ShowModal ? "block" : "none";
-    private bool ModalIsHidden => !ShowModal;
-
-    private string InputFileId { get; set; } = Guid.NewGuid().ToString();
-    private IBrowserFile? SelectedFile { get; set; }
-    private bool IsRecognitionInProgress => SpeechRecognitionState.IsRecognizing;
-    private string SelectedLanguage { get; set; } = DefaultLanguage;
-    private bool IsInvalidFile { get; set; }
-    private string FileValidationErrorDisplayStyle => IsInvalidFile ? "block" : "none";
-    private bool IsStartRecognitionDisabled => SelectedFile == null || IsRecognitionInProgress;
-
-    protected override Task OnInitializedAsync() {
-        return LoadFilesAsync();
-    }
-
-    private async Task LoadFilesAsync() {
-        Loading = true;
-        try {
-            ApplicationFolder = await OneDriveService.GetApplicationFolderAsync();
-            var files = await OneDriveService.GetFolderItemsAsync(ApplicationFolder!.Id);
-            Transcripts = files.Select(MapDriveItemToTranscript).OrderByDescending(t => t.CreatedDateTime);
-            if (SpeechRecognitionState.TranscriptInProgress != null) {
-                Transcripts = Transcripts.Prepend(SpeechRecognitionState.TranscriptInProgress);
-            }
-        }
-        catch (Exception ex) {
-            ConsentHandler.HandleException(ex);
-        }
-        finally {
-            Loading = false;
-        }
-    }
-
-    private Transcript MapDriveItemToTranscript(DriveItem file) {
-        return new Transcript() {
-                Id = file.Id,
-                Name = file.Name,
-                IsInProgress = false,
-                OneDriveUrl = file.WebUrl,
-                CreatedDateTime = file.CreatedDateTime,
-            };
-    }
-
-    private void ToggleModal() {
-        ShowModal = !ShowModal;
-        ResetModal();
-    }
-
-    private void OnInputFileChange(InputFileChangeEventArgs e) {
-        var file = e.File;
-
-        if (file.ContentType != "audio/wav") {
-            IsInvalidFile = true;
-            ClearInputFileSelection();
-            return;
-        }
-
-        IsInvalidFile = false;
-        SelectedFile = file;
-    }
-
-    private void ClearInputFileSelection() {
-        InputFileId = Guid.NewGuid().ToString();
-        SelectedFile = null;
-    }
-
-    private void ResetModal() {
-        ClearInputFileSelection();
-        IsInvalidFile = false;
-        SelectedLanguage = DefaultLanguage;
-    }
-
-    private void StartRecognition() {
-        SpeechRecognitionState.IsRecognizing = true;
-        Transcript newTranscript = new() {
-                Name = SelectedFile!.Name,
-                IsInProgress = true
-            };
-        Transcripts = Transcripts.Prepend(newTranscript);
-        SpeechRecognitionState.TranscriptInProgress = newTranscript;
-        ToggleModal();
-    }
-}
+<NavigationLock ConfirmExternalNavigation="ConfirmExternalNavigation" />

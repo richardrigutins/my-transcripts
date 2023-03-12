@@ -5,18 +5,17 @@ namespace Rigutins.MyTranscripts.Server.SpeechRecognition;
 public class BinaryAudioStreamReader : PullAudioInputStreamCallback
 {
 	private readonly BinaryReader _reader;
+	private int _bytesRead;
 
 	public BinaryAudioStreamReader(BinaryReader reader)
 	{
 		_reader = reader;
+		_bytesRead = 0;
 	}
 
 	public override int Read(byte[] dataBuffer, uint size)
 	{
-		// Read bytes from the binary reader
-		var readBytes = _reader.Read(dataBuffer, 0, (int)size);
-
-		// Return the number of bytes read
-		return readBytes;
+		_bytesRead += (int)size;
+		return _reader.Read(dataBuffer, 0, (int)size);
 	}
 }
