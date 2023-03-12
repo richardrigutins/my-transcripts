@@ -21,6 +21,8 @@ public class SpeechRecognitionState
 			}
 		}
 	}
+
+	public List<Transcript> Transcripts { get; set; } = new();
 	public Transcript? TranscriptInProgress { get; set; }
 	public List<string> RecognizedSentences { get; init; } = new();
 
@@ -36,13 +38,29 @@ public class SpeechRecognitionState
 
 	public void OnRecognitionStarted()
 	{
-		Clear();
 		IsRecognizing = true;
 	}
 
 	public void OnRecognitionCompleted(SpeechRecognitionResult recognitionResult)
 	{
 		IsRecognizing = false;
+		var transcript = Transcripts.FirstOrDefault(t => t.Id == TranscriptInProgress?.Id);
+		if (transcript == null)
+		{
+			return;
+		}
+
+		if (recognitionResult.Reason == SpeechRecognitionResultReason.Success)
+		{
+			transcript.Status = TranscriptStatus.Completed;
+		}
+		else
+		{
+			transcript.Status = TranscriptStatus.Failed;
+		}
+
+		TranscriptInProgress = null;
+		NotifyStateChanged();
 	}
 
 	public void Clear()

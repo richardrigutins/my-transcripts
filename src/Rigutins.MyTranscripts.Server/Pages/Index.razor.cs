@@ -20,7 +20,7 @@ public partial class Index : IDisposable
 	ILogger<Index> Logger { get; init; } = default!;
 
 	private DriveItem? ApplicationFolder { get; set; }
-	private IEnumerable<Transcript> Transcripts { get; set; } = new List<Transcript>();
+	private List<Transcript> Transcripts => SpeechRecognitionState.Transcripts;
 	private bool Loading { get; set; } = false;
 	private bool IsFabDisabled => IsRecognizing || Loading;
 
@@ -57,12 +57,11 @@ public partial class Index : IDisposable
 		Loading = true;
 		try
 		{
-			ApplicationFolder = await OneDriveService.GetApplicationFolderAsync();
-			var files = await OneDriveService.GetFolderItemsAsync(ApplicationFolder!.Id);
-			Transcripts = files.Select(MapDriveItemToTranscript).OrderByDescending(t => t.CreatedDateTime);
-			if (SpeechRecognitionState.TranscriptInProgress != null)
+			if (SpeechRecognitionState.Transcripts.Count == 0)
 			{
-				Transcripts = Transcripts.Prepend(SpeechRecognitionState.TranscriptInProgress);
+				ApplicationFolder = await OneDriveService.GetApplicationFolderAsync();
+				var files = await OneDriveService.GetFolderItemsAsync(ApplicationFolder!.Id);
+				SpeechRecognitionState.Transcripts = files.Select(MapDriveItemToTranscript).OrderByDescending(t => t.CreatedDateTime).ToList();
 			}
 		}
 		catch (Exception ex)
@@ -82,7 +81,7 @@ public partial class Index : IDisposable
 		{
 			Id = file.Id,
 			Name = file.Name,
-			IsInProgress = false,
+			Status = TranscriptStatus.Saved,
 			OneDriveUrl = file.WebUrl,
 			CreatedDateTime = file.CreatedDateTime,
 		};
@@ -125,18 +124,21 @@ public partial class Index : IDisposable
 
 	private async Task StartRecognition()
 	{
-		Transcript newTranscript = new()
-		{
-			Name = SelectedFile!.Name,
-			IsInProgress = true
-		};
-		Transcripts = Transcripts.Prepend(newTranscript);
-		SpeechRecognitionState.TranscriptInProgress = newTranscript;
-
 		if (SelectedFile == null)
 		{
 			return;
 		}
+
+		Transcript newTranscript = new()
+		{
+			Id = Guid.NewGuid().ToString(),
+			Name = SelectedFile!.Name,
+			Status = TranscriptStatus.InProgress,
+			CreatedDateTime = DateTime.Now,
+		};
+
+		SpeechRecognitionState.TranscriptInProgress = newTranscript;
+		SpeechRecognitionState.Transcripts = SpeechRecognitionState.Transcripts.Prepend(newTranscript).ToList();
 
 		LoadingModal = true;
 

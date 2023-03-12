@@ -13,7 +13,8 @@ public static class ServiceCollectionExtensions
 	private static IServiceCollection AddSpeechRecognition(this IServiceCollection services, Action<SpeechRecognitionOptions> configureOptions)
 	{
 		services.AddOptions<SpeechRecognitionOptions>().Configure(configureOptions);
-		services.AddScoped<ISpeechRecognitionService, AzureSpeechRecognitionService>();
+		//services.AddScoped<ISpeechRecognitionService, AzureSpeechRecognitionService>();
+		services.AddScoped<ISpeechRecognitionService, MockSpeechRecognitionService>();
 		return services;
 	}
 }

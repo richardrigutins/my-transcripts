@@ -5,9 +5,17 @@
         <div class="card-header">
             <h5 class="card-title">@Transcript.Name</h5>
         </div>
-        @if (Transcript.IsInProgress) {
+        @if (Transcript.Status == TranscriptStatus.InProgress) {
             <div class="card-body">
                 <Spinner ColorClass="text-primary" Size="40px" />
+            </div>
+        }
+        else if (Transcript.Status == TranscriptStatus.Completed) {
+            <div class="card-body">
+                Completed
+            </div>
+            <div class="card-footer">
+                <button class="btn btn-primary">Save</button>
             </div>
         }
         else {
