@@ -12,6 +12,7 @@ public class AzureSpeechRecognitionService : ISpeechRecognitionService
 	public event Action<SpeechRecognitionResult>? RecognitionCompleted;
 	public event Action? RecognitionStarted;
 	public event Action<string>? SentenceRecognized;
+	public event Action<int>? CompletionPercentageChanged;
 
 	public bool IsExecuting { get; private set; }
 
@@ -44,7 +45,7 @@ public class AzureSpeechRecognitionService : ISpeechRecognitionService
 
 			// Create an audio input stream from the byte array and the format.
 			var audioConfigStream = AudioInputStream.CreatePullStream(
-				new BinaryAudioStreamReader(new BinaryReader(stream)),
+				new BinaryAudioStreamReader(new BinaryReader(stream), stream.Length, OnCompletionPercentageChanged),
 				audioFormat
 			);
 
@@ -125,5 +126,10 @@ public class AzureSpeechRecognitionService : ISpeechRecognitionService
 	{
 		IsExecuting = false;
 		RecognitionCompleted?.Invoke(result);
+	}
+
+	private void OnCompletionPercentageChanged(int percentage)
+	{
+		CompletionPercentageChanged?.Invoke(percentage);
 	}
 }

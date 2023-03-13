@@ -11,4 +11,5 @@ public class Transcript
 	public TranscriptStatus Status { get; set; }
 	public string Language { get; set; } = "";
 	public IBrowserFile? SelectedFile { get; set; }
+	public int ProgressPercentage { get; set; }
 }

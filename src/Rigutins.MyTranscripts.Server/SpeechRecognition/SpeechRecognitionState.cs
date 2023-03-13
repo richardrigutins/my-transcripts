@@ -63,6 +63,18 @@ public class SpeechRecognitionState
 		NotifyStateChanged();
 	}
 
+	public void OnCompletionPercentageChanged(int percentage)
+	{
+		var transcript = Transcripts.FirstOrDefault(t => t.Id == TranscriptInProgress?.Id);
+		if (transcript == null)
+		{
+			return;
+		}
+
+		transcript.ProgressPercentage = percentage;
+		NotifyStateChanged();
+	}
+
 	public void Clear()
 	{
 		TranscriptInProgress = null;

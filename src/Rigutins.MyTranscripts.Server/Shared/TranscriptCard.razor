@@ -11,6 +11,9 @@
             <div class="card-body">
                 <Spinner ColorClass="text-primary" Size="40px" />
             </div>
+            <div class="card-footer">
+                Progress: @Transcript.ProgressPercentage%
+            </div>
         }
         else if (Transcript.Status == TranscriptStatus.Failed)
         {
@@ -33,13 +36,10 @@
         else
         {
             <div class="card-body">
-                <p class="mt-2 text-muted card-subtitle">
-                    Generated on @FormateCreatedDateTime(Transcript.CreatedDateTime)
-                </p>
+                Generated on @FormatCreatedDateTime(Transcript.CreatedDateTime)
             </div>
-            <hr class="m-0" />
-            <div class="card-body">
-                <a href="@Transcript.OneDriveUrl" class="card-link text-decoration-none" target="_blank">Open in OneDrive</a>
+            <div class="card-footer">
+                <a href="@Transcript.OneDriveUrl" class="btn btn-primary text-decoration-none" target="_blank">Open in OneDrive</a>
             </div>
         }
     </div>
@@ -55,7 +55,7 @@
     [Parameter]
     public Action<Transcript>? OnRemove { get; set; }
 
-    private string FormateCreatedDateTime(DateTimeOffset? createdDateTime)
+    private string FormatCreatedDateTime(DateTimeOffset? createdDateTime)
     {
         if (createdDateTime == null)
         {

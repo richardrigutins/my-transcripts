@@ -2,11 +2,15 @@
 
 public class MockSpeechRecognitionService : ISpeechRecognitionService
 {
+	private const int TotalTime = 10000;
+	private const int NumberOfIntervals = 100;
+
 	public bool IsExecuting { get; private set; }
 
 	public event Action<SpeechRecognitionResult>? RecognitionCompleted;
 	public event Action<string>? SentenceRecognized;
 	public event Action? RecognitionStarted;
+	public event Action<int>? CompletionPercentageChanged;
 
 	public async Task<SpeechRecognitionResult> RecognizeAsync(Stream stream, string language)
 	{
@@ -21,7 +25,17 @@ public class MockSpeechRecognitionService : ISpeechRecognitionService
 
 		IsExecuting = true;
 		RecognitionStarted?.Invoke();
-		await Task.Delay(10000);
+
+		var intervalLength = TotalTime / NumberOfIntervals;
+		double percentageSteps = 100 / NumberOfIntervals;
+		int percentage = 0;
+		for (int i = 0; i < NumberOfIntervals; i++)
+		{
+			await Task.Delay(intervalLength);
+			percentage += (int)percentageSteps;
+			CompletionPercentageChanged?.Invoke(percentage);
+		}
+
 		IsExecuting = false;
 		SpeechRecognitionResult result = new()
 		{

@@ -33,11 +33,13 @@
         SpeechRecognitionService.RecognitionStarted += SpeechRecognitionState.OnRecognitionStarted;
         SpeechRecognitionService.RecognitionCompleted += SpeechRecognitionState.OnRecognitionCompleted;
         SpeechRecognitionService.SentenceRecognized += SpeechRecognitionState.OnSentenceRecognized;
+        SpeechRecognitionService.CompletionPercentageChanged += SpeechRecognitionState.OnCompletionPercentageChanged;
     }
 
     public void Dispose() {
         SpeechRecognitionService.RecognitionStarted -= SpeechRecognitionState.OnRecognitionStarted;
         SpeechRecognitionService.RecognitionCompleted -= SpeechRecognitionState.OnRecognitionCompleted;
         SpeechRecognitionService.SentenceRecognized -= SpeechRecognitionState.OnSentenceRecognized;
+        SpeechRecognitionService.CompletionPercentageChanged -= SpeechRecognitionState.OnCompletionPercentageChanged;
     }
 }

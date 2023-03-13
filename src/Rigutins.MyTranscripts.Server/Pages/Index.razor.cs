@@ -42,6 +42,7 @@ public partial class Index : IDisposable
 	{
 		SpeechRecognitionService.RecognitionStarted += OnRecognitionStarted;
 		SpeechRecognitionService.RecognitionCompleted += OnRecognitionCompleted;
+		SpeechRecognitionState.OnChange += OnStateChanged;
 		return LoadFilesAsync();
 	}
 
@@ -49,6 +50,7 @@ public partial class Index : IDisposable
 	{
 		SpeechRecognitionService.RecognitionStarted -= OnRecognitionStarted;
 		SpeechRecognitionService.RecognitionCompleted -= OnRecognitionCompleted;
+		SpeechRecognitionState.OnChange -= OnStateChanged;
 	}
 
 	private async Task LoadFilesAsync()
@@ -206,6 +208,11 @@ public partial class Index : IDisposable
 	private void RemoveTranscript(Transcript transcript)
 	{
 		Transcripts.RemoveAll(t => t.Id == transcript.Id);
+		InvokeAsync(StateHasChanged);
+	}
+
+	private void OnStateChanged()
+	{
 		InvokeAsync(StateHasChanged);
 	}
 }
