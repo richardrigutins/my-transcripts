@@ -4,6 +4,49 @@
 
 <PageTitle>MyTranscripts | about</PageTitle>
 
-<h1>About</h1>
+<div class="py-2">
+    <h1 class="fw-bold">
+        About
+    </h1>
+
+    <p class="mb-4">
+        <strong>MyTranscripts</strong> is a Blazor Server web application that allows you to generate transcripts from
+        your audio files, and manage them from a centralized location.
+    </p>
+
+    <h2>
+        How it works
+    </h2>
+
+    <p class="mb-4">
+        <strong>MyTranscripts</strong> uses the Microsoft Azure Cognitive Services to generate transcripts from your
+        audio files.
+        The audio files are temporarily uploaded to the server and then sent to the Azure Speech Services to be
+        processed.
+        When the processing is complete, the audio files are deleted from the server.
+        The generated transcripts are saved inside a special folder in your OneDrive account.
+    </p>
+
+    <h2>
+        How to use
+    </h2>
+
+    <p class="mb-4">
+        To use <strong>MyTranscripts</strong>, you need to have a Microsoft account (e.g. a Microsoft account, a
+        Microsoft 365 account, etc.) with access to OneDrive.
+        You can use your Microsoft account to log in to the application.
+        After you log in, you will be asked to grant the application access to your OneDrive account.
+        This is required to read and save the generated transcripts.
+    </p>
+
+    <p class="mb-4">
+        After you log in, use the button in the bottom right corner to select the audio file you want to
+        generate a transcript for, then select the language of the audio file, and finally start the transcription.
+    </p>
+
+    <p class="mb-4">
+        After the transcription is complete, you can save the transcript to your OneDrive account.
+    </p>
+</div>
 
 <NavigationLock ConfirmExternalNavigation="ConfirmExternalNavigation" />
