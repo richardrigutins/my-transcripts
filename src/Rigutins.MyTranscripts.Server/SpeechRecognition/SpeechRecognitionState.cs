@@ -26,6 +26,8 @@ public class SpeechRecognitionState
 	public Transcript? TranscriptInProgress { get; set; }
 	public List<string> RecognizedSentences { get; init; } = new();
 
+	public bool HasUnsavedChanges => Transcripts.Any(t => t.Status != TranscriptStatus.Saved);
+
 	public event Action? OnChange;
 
 	public void OnSentenceRecognized(string sentence)

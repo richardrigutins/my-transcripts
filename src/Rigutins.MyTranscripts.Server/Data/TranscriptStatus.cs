@@ -5,6 +5,6 @@ public enum TranscriptStatus
 	Undefined,
 	InProgress,
 	Completed,
-	Saved,
 	Failed,
+	Saved,
 }

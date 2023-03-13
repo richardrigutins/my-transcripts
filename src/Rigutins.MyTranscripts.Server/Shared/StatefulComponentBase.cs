@@ -12,5 +12,5 @@ public abstract class StatefulComponentBase : ComponentBase
 	[CascadingParameter]
 	public SpeechRecognitionState SpeechRecognitionState { get; set; } = default!;
 
-	protected bool ConfirmExternalNavigation => SpeechRecognitionState.IsRecognizing;
+	protected bool ConfirmExternalNavigation => SpeechRecognitionState.HasUnsavedChanges;
 }
