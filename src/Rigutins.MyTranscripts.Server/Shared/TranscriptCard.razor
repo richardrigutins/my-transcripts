@@ -1,13 +1,11 @@
 ﻿@using Rigutins.MyTranscripts.Server.Data;
 
-@if (Transcript != null)
-{
+@if (Transcript != null) {
     <div class="card shadow">
         <div class="card-header">
             <h5 class="card-title">@Transcript.Name</h5>
         </div>
-        @if (Transcript.Status == TranscriptStatus.InProgress)
-        {
+        @if (Transcript.Status == TranscriptStatus.InProgress) {
             <div class="card-body">
                 <Spinner ColorClass="text-primary" Size="40px" />
             </div>
@@ -15,8 +13,7 @@
                 Progress: @Transcript.ProgressPercentage%
             </div>
         }
-        else if (Transcript.Status == TranscriptStatus.Failed)
-        {
+        else if (Transcript.Status == TranscriptStatus.Failed) {
             <div class="card-body text-danger">
                 Failed
             </div>
@@ -24,17 +21,16 @@
                 <button class="btn btn-danger" @onclick="Remove">Remove</button>
             </div>
         }
-        else if (Transcript.Status == TranscriptStatus.Completed)
-        {
+        else if (Transcript.Status == TranscriptStatus.Completed) {
             <div class="card-body">
                 Completed
             </div>
             <div class="card-footer">
+                <button class="btn btn-danger" @onclick="Remove">Remove</button>
                 <button class="btn btn-primary" @onclick="Save">Save</button>
             </div>
         }
-        else
-        {
+        else {
             <div class="card-body">
                 Generated on @FormatCreatedDateTime(Transcript.CreatedDateTime)
             </div>
@@ -55,30 +51,24 @@
     [Parameter]
     public Action<Transcript>? OnRemove { get; set; }
 
-    private string FormatCreatedDateTime(DateTimeOffset? createdDateTime)
-    {
-        if (createdDateTime == null)
-        {
+    private string FormatCreatedDateTime(DateTimeOffset? createdDateTime) {
+        if (createdDateTime == null) {
             return string.Empty;
         }
 
         return createdDateTime.Value.ToString("yyyy-MM-dd HH:mm");
     }
 
-    private void Save()
-    {
-        if (Transcript == null)
-        {
+    private void Save() {
+        if (Transcript == null) {
             return;
         }
 
         OnSave?.Invoke(Transcript);
     }
 
-    private void Remove()
-    {
-        if (Transcript == null)
-        {
+    private void Remove() {
+        if (Transcript == null) {
             return;
         }
 
