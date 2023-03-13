@@ -5,11 +5,17 @@ using Rigutins.MyTranscripts.Server.Data;
 using Rigutins.MyTranscripts.Server.Services;
 using Rigutins.MyTranscripts.Server.SpeechRecognition;
 using Rigutins.MyTranscripts.Server.Toasts;
+using System.Text;
 
 namespace Rigutins.MyTranscripts.Server.Pages;
 
 public partial class Index : IDisposable
 {
+	private static readonly List<char> InvalidCharacters = new()
+	{
+		'/', '\\', '@', '.', ',', ';', ':',
+	};
+
 	[Inject]
 	IOneDriveService OneDriveService { get; init; } = default!;
 
@@ -21,13 +27,27 @@ public partial class Index : IDisposable
 
 	private DriveItem? ApplicationFolder { get; set; }
 	private List<Transcript> Transcripts => SpeechRecognitionState.Transcripts;
-	private bool Loading { get; set; } = false;
-	private bool IsFabDisabled => IsRecognizing || Loading || IsReadingFile;
+	private IOrderedEnumerable<Transcript> OrderedTranscripts => Transcripts.OrderBy(t => t.Status).ThenByDescending(t => t.CreatedDateTime);
+	private bool IsLoading { get; set; } = false;
+	private bool IsFabDisabled => IsRecognizing || IsLoading || IsReadingFile;
 
-	private bool ShowModal { get; set; } = false;
-	private string ModalClass => ShowModal ? "modal fade show" : "modal fade";
-	private string ModalDisplayType => ShowModal ? "block" : "none";
-	private bool ModalIsHidden => !ShowModal;
+	private bool ShowOverlay => ShowTranscribeModal || ShowSaveModal;
+	private string OverlayClass => ShowOverlay ? "modal fade show" : "modal fade";
+	private string OverlayDisplayType => ShowOverlay ? "block" : "none";
+	private bool OverlayIsHidden => !ShowOverlay;
+
+	private bool ShowTranscribeModal { get; set; } = false;
+	private string TranscribeModalClass => ShowTranscribeModal ? "modal fade show" : "modal fade";
+	private string TranscribeModalDisplayType => ShowTranscribeModal ? "block" : "none";
+	private bool TranscribeModalIsHidden => !ShowTranscribeModal;
+
+	private bool ShowSaveModal { get; set; } = false;
+	private string SaveModalClass => ShowSaveModal ? "modal fade show" : "modal fade";
+	private string SaveModalDisplayType => ShowSaveModal ? "block" : "none";
+	private bool SaveModalIsHidden => !ShowSaveModal;
+	private string SaveFileName { get; set; } = string.Empty;
+	private Transcript? SelectedTranscript { get; set; }
+	private bool IsSaveTranscriptDisabled => string.IsNullOrWhiteSpace(SaveFileName) || SaveFileName.Any(c => InvalidCharacters.Contains(c)) || IsLoading;
 
 	private string InputFileId { get; set; } = Guid.NewGuid().ToString();
 	private IBrowserFile? SelectedFile { get; set; }
@@ -56,7 +76,7 @@ public partial class Index : IDisposable
 
 	private async Task LoadFilesAsync()
 	{
-		Loading = true;
+		IsLoading = true;
 		try
 		{
 			if (SpeechRecognitionState.Transcripts.Count == 0)
@@ -73,7 +93,7 @@ public partial class Index : IDisposable
 		}
 		finally
 		{
-			Loading = false;
+			IsLoading = false;
 		}
 	}
 
@@ -86,13 +106,86 @@ public partial class Index : IDisposable
 			Status = TranscriptStatus.Saved,
 			OneDriveUrl = file.WebUrl,
 			CreatedDateTime = file.CreatedDateTime,
+			ProgressPercentage = 100,
 		};
 	}
 
-	private void ToggleModal()
+	private void ToggleTranscribeModal()
 	{
-		ShowModal = !ShowModal;
+		ShowTranscribeModal = !ShowTranscribeModal;
 		ResetModal();
+	}
+
+	private void StartSaveTranscript(Transcript transcript)
+	{
+		SelectedTranscript = transcript;
+		ToggleSaveModal();
+	}
+
+	private void ToggleSaveModal()
+	{
+		SaveFileName = string.Empty;
+		ShowSaveModal = !ShowSaveModal;
+		if (!ShowSaveModal)
+		{
+			SelectedTranscript = null;
+		}
+
+		StateHasChanged();
+	}
+
+	private async Task SaveTranscript()
+	{
+		if (SelectedTranscript is null)
+		{
+			return;
+		}
+
+		try
+		{
+			if (ApplicationFolder is null)
+			{
+				ToastState.ShowToast("Can't find folder", ToastColor.Warning);
+				return;
+			}
+
+			if (SelectedTranscript.RecognizedSentences.Count == 0)
+			{
+				ToastState.ShowToast("The transcript is empty!", ToastColor.Warning);
+				return;
+			}
+
+			IsLoading = true;
+			var fileName = FormatName(SaveFileName);
+			var fileContent = SelectedTranscript.RecognizedSentences;
+			var selectedTranscriptId = SelectedTranscript.Id;
+			ToggleSaveModal();
+
+			using var stream = new MemoryStream(Encoding.UTF8.GetBytes(string.Join(Environment.NewLine, fileContent)));
+			var saveResult = await OneDriveService.UploadFileAsync(fileName, stream, ApplicationFolder);
+			Transcripts.RemoveAll(t => t.Id == selectedTranscriptId);
+			var savedTranscript = MapDriveItemToTranscript(saveResult);
+			Transcripts.Add(savedTranscript);
+
+			ToastState.ShowToast("Saved transcript");
+			SelectedTranscript = null;
+			StateHasChanged();
+		}
+		catch (Exception ex)
+		{
+			Logger.LogError(ex, "An error occurred");
+			ToastState.ShowToast(ex.Message, ToastColor.Error);
+		}
+		finally
+		{
+			IsLoading = false;
+		}
+	}
+
+	private string FormatName(string name)
+	{
+		var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(name);
+		return fileNameWithoutExtension + ".txt";
 	}
 
 	private void OnInputFileChange(InputFileChangeEventArgs e)
@@ -145,7 +238,7 @@ public partial class Index : IDisposable
 		SpeechRecognitionState.TranscriptInProgress = newTranscript;
 		SpeechRecognitionState.Transcripts = SpeechRecognitionState.Transcripts.Prepend(newTranscript).ToList();
 
-		ToggleModal();
+		ToggleTranscribeModal();
 
 		try
 		{
@@ -171,7 +264,6 @@ public partial class Index : IDisposable
 			IsReadingFile = false;
 		}
 	}
-
 
 	private void OnRecognitionStarted()
 	{

@@ -12,4 +12,5 @@ public class Transcript
 	public string Language { get; set; } = "";
 	public IBrowserFile? SelectedFile { get; set; }
 	public int ProgressPercentage { get; set; }
+	public List<string> RecognizedSentences { get; set; } = new();
 }

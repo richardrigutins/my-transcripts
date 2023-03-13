@@ -53,6 +53,7 @@ public class SpeechRecognitionState
 		if (recognitionResult.Reason == SpeechRecognitionResultReason.Success)
 		{
 			transcript.Status = TranscriptStatus.Completed;
+			transcript.RecognizedSentences = RecognizedSentences;
 		}
 		else
 		{

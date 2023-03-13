@@ -2,7 +2,7 @@
 
 public class MockSpeechRecognitionService : ISpeechRecognitionService
 {
-	private const int TotalTime = 10000;
+	private const int TotalTime = 5000;
 	private const int NumberOfIntervals = 100;
 
 	public bool IsExecuting { get; private set; }
@@ -34,6 +34,7 @@ public class MockSpeechRecognitionService : ISpeechRecognitionService
 			await Task.Delay(intervalLength);
 			percentage += (int)percentageSteps;
 			CompletionPercentageChanged?.Invoke(percentage);
+			SentenceRecognized?.Invoke(Guid.NewGuid().ToString());
 		}
 
 		IsExecuting = false;

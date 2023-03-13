@@ -24,7 +24,7 @@ else
 
 @code {
     [Parameter]
-    public List<Transcript> Transcripts { get; set; } = new();
+    public IEnumerable<Transcript> Transcripts { get; set; } = Enumerable.Empty<Transcript>();
 
     [Parameter]
     public Action<Transcript>? OnSaveTranscript { get; set; }
