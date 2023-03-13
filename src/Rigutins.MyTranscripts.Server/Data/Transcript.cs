@@ -1,4 +1,6 @@
-﻿namespace Rigutins.MyTranscripts.Server.Data;
+﻿using Microsoft.AspNetCore.Components.Forms;
+
+namespace Rigutins.MyTranscripts.Server.Data;
 
 public class Transcript
 {
@@ -7,4 +9,6 @@ public class Transcript
 	public string? OneDriveUrl { get; set; }
 	public DateTimeOffset? CreatedDateTime { get; set; }
 	public TranscriptStatus Status { get; set; }
+	public string Language { get; set; } = "";
+	public IBrowserFile? SelectedFile { get; set; }
 }

@@ -10,28 +10,15 @@
     My transcripts
 </h1>
 
-@if (Loading) {
+@if (Loading)
+{
     <div class="row py-5">
         <Spinner ColorClass="text-primary" Size="40px" />
     </div>
 }
-else if (Transcripts.Count() == 0) {
-    <div class="row">
-        <div class="col-12">
-            <p class="lead">
-                You don't have any transcripts yet.
-            </p>
-        </div>
-    </div>
-}
-else {
-    <div class="row">
-        @foreach (var transcript in Transcripts) {
-            <div class="col-xl-3 col-sm-6 mb-4">
-                <TranscriptCard Transcript="transcript" />
-            </div>
-        }
-    </div>
+else
+{
+    <TranscriptsList Transcripts="Transcripts" OnRemoveTranscript="RemoveTranscript" />
 }
 
 <div class="position-fixed sticky-bottom m-5" style="bottom: 0; right: 0;">
@@ -55,37 +42,31 @@ else {
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @onclick="ToggleModal"></button>
             </div>
-            @if (LoadingModal) {
-                <div class="modal-body py-4">
-                    <Spinner ColorClass="text-primary" Size="40px" />
+            <div class="modal-body">
+                <div class="row">
+                    <p>Generate a transcript by uploading your audio file and selecting the language.</p>
                 </div>
-            }
-            else {
-                <div class="modal-body">
-                    <div class="row">
-                        <p>Generate a transcript by uploading your audio file and selecting the language.</p>
-                    </div>
-                    <div class="row">
-                        <WarningAlert Title="Note:" Body="Only .wav files are supported at the moment." />
-                    </div>
-                    <div class="input-group mb-3">
-                        <select class="form-select" aria-label="Select language" @bind="SelectedLanguage">
-                            @foreach (var language in Language.Languages) {
-                                <option value="@language.Key">@language.Value</option>
-                            }
-                        </select>
-                    </div>
-                    <div class="input-group has-validation">
-                        <InputFile class="form-control" OnChange="OnInputFileChange" @key=@(InputFileId) accept="audio/wav" required />
-                        <div class="invalid-feedback" style="display: @FileValidationErrorDisplayStyle">
-                            Please select a valid file.
-                        </div>
+                <div class="row">
+                    <WarningAlert Title="Note:" Body="Only .wav files are supported at the moment." />
+                </div>
+                <div class="input-group mb-3">
+                    <select class="form-select" aria-label="Select language" @bind="SelectedLanguage">
+                        @foreach (var language in Language.Languages)
+                        {
+                            <option value="@language.Key">@language.Value</option>
+                        }
+                    </select>
+                </div>
+                <div class="input-group has-validation">
+                    <InputFile class="form-control" OnChange="OnInputFileChange" @key=@(InputFileId) accept="audio/wav" required />
+                    <div class="invalid-feedback" style="display: @FileValidationErrorDisplayStyle">
+                        Please select a valid file.
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal" @onclick="StartRecognition" disabled="@IsStartRecognitionDisabled">Start</button>
-                </div>
-            }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal" @onclick="StartRecognition" disabled="@IsStartRecognitionDisabled">Start</button>
+            </div>
         </div>
     </div>
 </div>

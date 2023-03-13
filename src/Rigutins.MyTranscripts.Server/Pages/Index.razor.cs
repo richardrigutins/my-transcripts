@@ -29,7 +29,6 @@ public partial class Index : IDisposable
 	private string ModalDisplayType => ShowModal ? "block" : "none";
 	private bool ModalIsHidden => !ShowModal;
 
-	private bool LoadingModal { get; set; }
 	private string InputFileId { get; set; } = Guid.NewGuid().ToString();
 	private IBrowserFile? SelectedFile { get; set; }
 	private string SelectedLanguage { get; set; } = Language.DefaultLanguage;
@@ -119,7 +118,6 @@ public partial class Index : IDisposable
 		ClearInputFileSelection();
 		IsInvalidFile = false;
 		SelectedLanguage = Language.DefaultLanguage;
-		LoadingModal = false;
 	}
 
 	private async Task StartRecognition()
@@ -135,22 +133,34 @@ public partial class Index : IDisposable
 			Name = SelectedFile!.Name,
 			Status = TranscriptStatus.InProgress,
 			CreatedDateTime = DateTime.Now,
+			Language = SelectedLanguage,
+			SelectedFile = SelectedFile,
 		};
 
 		SpeechRecognitionState.TranscriptInProgress = newTranscript;
 		SpeechRecognitionState.Transcripts = SpeechRecognitionState.Transcripts.Prepend(newTranscript).ToList();
 
-		LoadingModal = true;
+		ToggleModal();
 
-		// Load file into memory stream
-		var stream = new MemoryStream();
-		await SelectedFile.OpenReadStream(SelectedFile.Size).CopyToAsync(stream);
-		stream.Position = 0;
-
-		await InvokeAsync(() =>
+		try
 		{
-			SpeechRecognitionService.RecognizeAsync(stream, SelectedLanguage);
-		});
+			// Load file into memory stream
+			var stream = new MemoryStream();
+			IBrowserFile file = newTranscript.SelectedFile;
+			await file.OpenReadStream(file.Size).CopyToAsync(stream);
+			stream.Position = 0;
+
+			await InvokeAsync(() =>
+			{
+				SpeechRecognitionService.RecognizeAsync(stream, newTranscript.Language);
+			});
+		}
+		catch (Exception ex)
+		{
+			Logger.LogError(ex, "An error occurred");
+			newTranscript.Status = TranscriptStatus.Failed;
+			ToastState.ShowToast(ex.Message, ToastColor.Error);
+		}
 	}
 
 
@@ -160,7 +170,6 @@ public partial class Index : IDisposable
 		{
 			try
 			{
-				ToggleModal();
 				StateHasChanged();
 				ToastState.ShowToast("Recognition started");
 			}
@@ -177,7 +186,6 @@ public partial class Index : IDisposable
 		{
 			try
 			{
-				LoadingModal = false;
 				StateHasChanged();
 				if (recognitionResult.Reason == SpeechRecognitionResultReason.Success)
 				{
@@ -193,5 +201,11 @@ public partial class Index : IDisposable
 				Logger.LogError(ex, "An error occurred");
 			}
 		});
+	}
+
+	private void RemoveTranscript(Transcript transcript)
+	{
+		Transcripts.RemoveAll(t => t.Id == transcript.Id);
+		InvokeAsync(StateHasChanged);
 	}
 }
