@@ -22,7 +22,7 @@ public partial class Index : IDisposable
 	private DriveItem? ApplicationFolder { get; set; }
 	private List<Transcript> Transcripts => SpeechRecognitionState.Transcripts;
 	private bool Loading { get; set; } = false;
-	private bool IsFabDisabled => IsRecognizing || Loading;
+	private bool IsFabDisabled => IsRecognizing || Loading || IsReadingFile;
 
 	private bool ShowModal { get; set; } = false;
 	private string ModalClass => ShowModal ? "modal fade show" : "modal fade";
@@ -37,6 +37,7 @@ public partial class Index : IDisposable
 	private bool IsStartRecognitionDisabled => SelectedFile == null || IsRecognizing;
 
 	private bool IsRecognizing => SpeechRecognitionState.IsRecognizing;
+	private bool IsReadingFile { get; set; }
 
 	protected override Task OnInitializedAsync()
 	{
@@ -129,6 +130,8 @@ public partial class Index : IDisposable
 			return;
 		}
 
+		IsReadingFile = true;
+
 		Transcript newTranscript = new()
 		{
 			Id = Guid.NewGuid().ToString(),
@@ -162,6 +165,10 @@ public partial class Index : IDisposable
 			Logger.LogError(ex, "An error occurred");
 			newTranscript.Status = TranscriptStatus.Failed;
 			ToastState.ShowToast(ex.Message, ToastColor.Error);
+		}
+		finally
+		{
+			IsReadingFile = false;
 		}
 	}
 
