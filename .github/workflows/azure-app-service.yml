@@ -7,7 +7,6 @@ on:
   workflow_dispatch:
   
 env:
-  AZURE_WEBAPP_NAME: app-mytranscripts-prod-eastus
   AZURE_WEBAPP_PACKAGE_PATH: src/Rigutins.MyTranscripts.Server/published
   CONFIGURATION: Release
   DOTNET_CORE_VERSION: 7.0.x
@@ -32,6 +31,6 @@ jobs:
     - name: Deploy to Azure WebApp
       uses: azure/webapps-deploy@v2
       with:
-        app-name: ${{ env.AZURE_WEBAPP_NAME }}
-        publish-profile: ${{ secrets.app_mytranscripts_prod_eastus_41D3 }}
+        app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
+        publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
         package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}

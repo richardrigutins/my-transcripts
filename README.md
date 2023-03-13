@@ -45,6 +45,17 @@ __MyTranscripts__ is a Blazor Server web application that leverages Azure Cognit
 - The application has only been tested with short-medium length audio files (less than 10 minutes)
 - Only supports selecting files from the local file system
 
+## Deploying to Azure
+
+This repository contains an automated workflow that will deploy the application to Azure App Service. To deploy the application to Azure, follow these steps:
+
+1. Fork the repository.
+2. Create an Azure App Service resource.
+3. Set the publish profile for the Azure App Service resource in the repository secrets as `AZURE_PUBLISH_PROFILE`.
+4. Set the Aure App Service name in the repository secrets as `AZURE_APP_SERVICE_NAME`.
+
+The application will be deployed to the Azure App Service when a commit is pushed to the `main` branch.
+
 ## Contributing
 
 Contributions are welcome! Please open an issue or submit a pull request.
