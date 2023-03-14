@@ -41,6 +41,17 @@ public class SpeechRecognitionState
 	public void OnRecognitionStarted()
 	{
 		IsRecognizing = true;
+		RecognizedSentences.Clear(); // Clear recognized sentences from previous recognition
+
+		var transcript = Transcripts.FirstOrDefault(t => t.Id == TranscriptInProgress?.Id);
+		if (transcript == null)
+		{
+			return;
+		}
+
+		transcript.Status = TranscriptStatus.InProgress;
+		transcript.ProgressPercentage = 0;
+		NotifyStateChanged();
 	}
 
 	public void OnRecognitionCompleted(SpeechRecognitionResult recognitionResult)
@@ -76,12 +87,6 @@ public class SpeechRecognitionState
 
 		transcript.ProgressPercentage = percentage;
 		NotifyStateChanged();
-	}
-
-	public void Clear()
-	{
-		TranscriptInProgress = null;
-		RecognizedSentences.Clear();
 	}
 
 	private void NotifyStateChanged()

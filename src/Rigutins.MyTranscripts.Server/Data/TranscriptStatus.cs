@@ -3,6 +3,7 @@
 public enum TranscriptStatus
 {
 	Undefined,
+	Uploading,
 	InProgress,
 	Completed,
 	Failed,

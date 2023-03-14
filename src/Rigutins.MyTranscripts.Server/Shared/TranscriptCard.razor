@@ -13,6 +13,14 @@
                 Progress: @Transcript.ProgressPercentage%
             </div>
         }
+        else if (Transcript.Status == TranscriptStatus.Uploading) {
+            <div class="card-body">
+                <Spinner ColorClass="text-primary" Size="40px" />
+            </div>
+            <div class="card-footer">
+                Uploading...
+            </div>
+        }
         else if (Transcript.Status == TranscriptStatus.Failed) {
             <div class="card-body text-danger">
                 Failed

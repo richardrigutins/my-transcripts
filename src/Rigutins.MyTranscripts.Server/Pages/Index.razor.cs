@@ -11,9 +11,11 @@ namespace Rigutins.MyTranscripts.Server.Pages;
 
 public partial class Index : IDisposable
 {
+	private const int MaxFileNameLength = 50; // Max file name length in OneDrive
+											  // Invalid characters for file name
 	private static readonly List<char> InvalidCharacters = new()
 	{
-		'/', '\\', '@', '.', ',', ';', ':',
+		'<', '>', ':', '"', '/', '\\', '|', '?', '*'
 	};
 
 	[Inject]
@@ -47,7 +49,7 @@ public partial class Index : IDisposable
 	private bool SaveModalIsHidden => !ShowSaveModal;
 	private string SaveFileName { get; set; } = string.Empty;
 	private Transcript? SelectedTranscript { get; set; }
-	private bool IsSaveTranscriptDisabled => string.IsNullOrWhiteSpace(SaveFileName) || SaveFileName.Any(c => InvalidCharacters.Contains(c)) || IsLoading;
+	private bool IsSaveTranscriptDisabled => string.IsNullOrWhiteSpace(SaveFileName) || SaveFileName.Any(c => InvalidCharacters.Contains(c)) || IsLoading || SaveFileName.Length > MaxFileNameLength;
 
 	private string InputFileId { get; set; } = Guid.NewGuid().ToString();
 	private IBrowserFile? SelectedFile { get; set; }
@@ -185,6 +187,14 @@ public partial class Index : IDisposable
 	private string FormatName(string name)
 	{
 		var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(name);
+		if (fileNameWithoutExtension.Length > MaxFileNameLength)
+		{
+			fileNameWithoutExtension = fileNameWithoutExtension.Substring(0, MaxFileNameLength);
+		}
+
+		// remove whitespaces
+		fileNameWithoutExtension = fileNameWithoutExtension.Trim();
+
 		return fileNameWithoutExtension + ".txt";
 	}
 
@@ -227,9 +237,9 @@ public partial class Index : IDisposable
 
 		Transcript newTranscript = new()
 		{
-			Id = Guid.NewGuid().ToString(),
+			Id = Guid.NewGuid().ToString(), // temporary id, will be replaced with the id of the saved file
 			Name = SelectedFile!.Name,
-			Status = TranscriptStatus.InProgress,
+			Status = TranscriptStatus.Uploading,
 			CreatedDateTime = DateTime.Now,
 			Language = SelectedLanguage,
 			SelectedFile = SelectedFile,
@@ -307,7 +317,7 @@ public partial class Index : IDisposable
 	private void RemoveTranscript(Transcript transcript)
 	{
 		Transcripts.RemoveAll(t => t.Id == transcript.Id);
-		InvokeAsync(StateHasChanged);
+		OnStateChanged();
 	}
 
 	private void OnStateChanged()
