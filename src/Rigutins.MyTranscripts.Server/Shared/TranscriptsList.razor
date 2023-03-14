@@ -16,7 +16,7 @@ else
         @foreach (var transcript in Transcripts)
         {
             <div class="col-xl-3 col-sm-6 mb-4">
-                <TranscriptCard Transcript="transcript" OnRemove="OnRemoveTranscript" OnSave="OnSaveTranscript" />
+                <TranscriptCard Transcript="transcript" OnRemove="OnRemoveTranscript" OnSave="OnSaveTranscript" OnDelete="OnDeleteTranscript" />
             </div>
         }
     </div>
@@ -31,4 +31,7 @@ else
 
     [Parameter]
     public Action<Transcript>? OnRemoveTranscript { get; set; }
+
+    [Parameter]
+    public Action<Transcript>? OnDeleteTranscript { get; set; }
 }

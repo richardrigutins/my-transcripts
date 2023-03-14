@@ -88,4 +88,9 @@ public class GraphOneDriveService : IOneDriveService
 	{
 		return await _graphServiceClient.Me.Drive.Items[parentFolderId].ItemWithPath(fileName).Content.Request().PutAsync<DriveItem>(fileStream);
 	}
+
+	public Task DeleteFileAsync(string fileId)
+	{
+		return _graphServiceClient.Me.Drive.Items[fileId].Request().DeleteAsync();
+	}
 }

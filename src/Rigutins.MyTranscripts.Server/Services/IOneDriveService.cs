@@ -10,4 +10,5 @@ public interface IOneDriveService
 	Task<DriveItem> GetDriveItemAsync(string itemId);
 	Task<DriveItem> UploadFileAsync(string fileName, Stream fileStream, string parentFolderId);
 	Task<DriveItem> GetApplicationFolderAsync();
+	Task DeleteFileAsync(string fileId);
 }

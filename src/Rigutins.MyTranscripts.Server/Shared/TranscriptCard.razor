@@ -1,11 +1,13 @@
 ﻿@using Rigutins.MyTranscripts.Server.Data;
 
-@if (Transcript != null) {
+@if (Transcript != null)
+{
     <div class="card shadow">
         <div class="card-header">
             <h5 class="card-title">@Transcript.Name</h5>
         </div>
-        @if (Transcript.Status == TranscriptStatus.InProgress) {
+        @if (Transcript.Status == TranscriptStatus.InProgress)
+        {
             <div class="card-body">
                 <Spinner ColorClass="text-primary" Size="40px" />
             </div>
@@ -13,7 +15,8 @@
                 Progress: @Transcript.ProgressPercentage%
             </div>
         }
-        else if (Transcript.Status == TranscriptStatus.Uploading) {
+        else if (Transcript.Status == TranscriptStatus.Uploading)
+        {
             <div class="card-body">
                 <Spinner ColorClass="text-primary" Size="40px" />
             </div>
@@ -21,7 +24,8 @@
                 Uploading...
             </div>
         }
-        else if (Transcript.Status == TranscriptStatus.Failed) {
+        else if (Transcript.Status == TranscriptStatus.Failed)
+        {
             <div class="card-body text-danger">
                 Recognition failed: @Transcript.StatusMessage
             </div>
@@ -29,7 +33,8 @@
                 <button class="btn btn-danger" @onclick="Remove">Remove</button>
             </div>
         }
-        else if (Transcript.Status == TranscriptStatus.Completed) {
+        else if (Transcript.Status == TranscriptStatus.Completed)
+        {
             <div class="card-body">
                 Recognition completed!
             </div>
@@ -38,11 +43,13 @@
                 <button class="btn btn-primary" @onclick="Save">Save to OneDrive</button>
             </div>
         }
-        else {
+        else
+        {
             <div class="card-body">
                 Generated on @FormatCreatedDateTime(Transcript.CreatedDateTime)
             </div>
             <div class="card-footer">
+                <button class="btn btn-danger" @onclick="Delete">Delete</button>
                 <a href="@Transcript.OneDriveUrl" class="btn btn-primary text-decoration-none" target="_blank">Open in OneDrive</a>
             </div>
         }
@@ -59,27 +66,46 @@
     [Parameter]
     public Action<Transcript>? OnRemove { get; set; }
 
-    private string FormatCreatedDateTime(DateTimeOffset? createdDateTime) {
-        if (createdDateTime == null) {
+    [Parameter]
+    public Action<Transcript>? OnDelete { get; set; }
+
+    private string FormatCreatedDateTime(DateTimeOffset? createdDateTime)
+    {
+        if (createdDateTime == null)
+        {
             return string.Empty;
         }
 
         return createdDateTime.Value.ToString("yyyy-MM-dd HH:mm");
     }
 
-    private void Save() {
-        if (Transcript == null) {
+    private void Save()
+    {
+        if (Transcript == null)
+        {
             return;
         }
 
         OnSave?.Invoke(Transcript);
     }
 
-    private void Remove() {
-        if (Transcript == null) {
+    private void Remove()
+    {
+        if (Transcript == null)
+        {
             return;
         }
 
         OnRemove?.Invoke(Transcript);
+    }
+
+    private void Delete()
+    {
+        if (Transcript == null)
+        {
+            return;
+        }
+
+        OnDelete?.Invoke(Transcript);
     }
 }

@@ -20,7 +20,7 @@
     else
     {
         <TranscriptsList Transcripts="OrderedTranscripts" OnSaveTranscript="StartSaveTranscript"
-                     OnRemoveTranscript="RemoveTranscript" />
+                     OnRemoveTranscript="RemoveTranscript" OnDeleteTranscript="ConfirmDeleteTranscript" />
     }
 
     <div class="position-fixed sticky-bottom m-5" style="bottom: 0; right: 0;">
@@ -86,8 +86,6 @@
                     <h5 class="modal-title">
                         Save
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
-                            @onclick="ToggleSaveModal"></button>
                 </div>
                 <EditForm Model="SaveFileFormModel" OnValidSubmit="SaveTranscript">
                     <div class="modal-body">
@@ -96,12 +94,38 @@
                         <FluentValidator TValidator="SaveFileFormDataFluentValidator" />
                     </div>
                     <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @onclick="ToggleSaveModal">Cancel</button>
                         <button type="submit" class="btn btn-primary" data-dismiss="modal"
                                 disabled="@IsSaveTranscriptDisabled">
                             Save
                         </button>
                     </div>
                 </EditForm>
+            </div>
+        </div>
+    </div>
+
+    <div class="@DeleteModalClass" style="display:@DeleteModalDisplayType" tabindex="4" role="dialog"
+         aria-hidden="@DeleteModalIsHidden">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content container">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        Delete
+                    </h5>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete this file? It will be removed from OneDrive.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal" @onclick="ToggleDeleteModal">
+                        Cancel
+                    </button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal" @onclick="DeleteTranscript"
+                            disabled="@IsDeleteTranscriptDisabled">
+                        Delete
+                    </button>
+                </div>
             </div>
         </div>
     </div>

@@ -25,8 +25,9 @@ public partial class Index : IDisposable
 	private IOrderedEnumerable<Transcript> OrderedTranscripts => Transcripts.OrderBy(t => t.Status).ThenByDescending(t => t.CreatedDateTime);
 	private bool IsLoading { get; set; } = false;
 	private bool IsFabDisabled => IsRecognizing || IsLoading || IsReadingFile;
+	private Transcript? SelectedTranscript { get; set; }
 
-	private bool ShowOverlay => ShowTranscribeModal || ShowSaveModal;
+	private bool ShowOverlay => ShowTranscribeModal || ShowSaveModal || ShowDeleteModal;
 	private string OverlayClass => ShowOverlay ? "modal fade show" : "modal fade";
 	private string OverlayDisplayType => ShowOverlay ? "block" : "none";
 	private bool OverlayIsHidden => !ShowOverlay;
@@ -41,8 +42,13 @@ public partial class Index : IDisposable
 	private string SaveModalDisplayType => ShowSaveModal ? "block" : "none";
 	private bool SaveModalIsHidden => !ShowSaveModal;
 	private SaveFileFormData SaveFileFormModel { get; set; } = new();
-	private Transcript? SelectedTranscript { get; set; }
 	private bool IsSaveTranscriptDisabled => IsLoading;
+
+	private bool ShowDeleteModal { get; set; } = false;
+	private string DeleteModalClass => ShowDeleteModal ? "modal fade show" : "modal fade";
+	private string DeleteModalDisplayType => ShowDeleteModal ? "block" : "none";
+	private bool DeleteModalIsHidden => !ShowDeleteModal;
+	private bool IsDeleteTranscriptDisabled => IsLoading;
 
 	private string InputFileId { get; set; } = Guid.NewGuid().ToString();
 	private IBrowserFile? SelectedFile { get; set; }
@@ -191,6 +197,53 @@ public partial class Index : IDisposable
 		fileNameWithoutExtension = fileNameWithoutExtension.Trim();
 
 		return fileNameWithoutExtension + ".txt";
+	}
+
+	private void ConfirmDeleteTranscript(Transcript transcript)
+	{
+		SelectedTranscript = transcript;
+		ToggleDeleteModal();
+	}
+
+	private async Task DeleteTranscript()
+	{
+		if (SelectedTranscript is null)
+		{
+			return;
+		}
+
+		try
+		{
+			IsLoading = true;
+			var selectedTranscriptId = SelectedTranscript.Id;
+			ToggleDeleteModal();
+
+			await OneDriveService.DeleteFileAsync(selectedTranscriptId);
+			Transcripts.RemoveAll(t => t.Id == selectedTranscriptId);
+
+			ToastState.ShowToast("Deleted transcript");
+			StateHasChanged();
+		}
+		catch (Exception ex)
+		{
+			Logger.LogError(ex, "An error occurred");
+			ToastState.ShowToast(ex.Message, ToastColor.Error);
+		}
+		finally
+		{
+			IsLoading = false;
+		}
+	}
+
+	private void ToggleDeleteModal()
+	{
+		ShowDeleteModal = !ShowDeleteModal;
+		if (!ShowDeleteModal)
+		{
+			SelectedTranscript = null;
+		}
+
+		StateHasChanged();
 	}
 
 	private void OnInputFileChange(InputFileChangeEventArgs e)
