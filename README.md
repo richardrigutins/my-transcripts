@@ -2,6 +2,8 @@
 
 __MyTranscripts__ is a Blazor Server web application that leverages Azure Cognitive Services and Microsoft Graph to provide a simple way to transcribe audio files and store them in OneDrive.
 
+[![Hack Together: Microsoft Graph and .NET](https://img.shields.io/badge/Microsoft%20-Hack--Together-orange?style=for-the-badge&logo=microsoft)](https://github.com/microsoft/hack-together)
+
 ## Features
 
 - Transcribe audio files to text using Azure Cognitive Services Speech to Text
