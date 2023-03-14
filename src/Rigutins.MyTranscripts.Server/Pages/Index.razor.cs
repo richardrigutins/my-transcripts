@@ -20,8 +20,8 @@ public partial class Index : IDisposable
 	[Inject]
 	ILogger<Index> Logger { get; init; } = default!;
 
-	private string? ApplicationFolderId { get => SpeechRecognitionState.ApplicationFolderId; set => SpeechRecognitionState.ApplicationFolderId = value; }
-	private List<Transcript> Transcripts => SpeechRecognitionState.Transcripts;
+	private string? ApplicationFolderId { get => ApplicationState.ApplicationFolderId; set => ApplicationState.ApplicationFolderId = value; }
+	private List<Transcript> Transcripts => ApplicationState.Transcripts;
 	private IOrderedEnumerable<Transcript> OrderedTranscripts => Transcripts.OrderBy(t => t.Status).ThenByDescending(t => t.CreatedDateTime);
 	private bool IsLoading { get; set; } = false;
 	private bool IsFabDisabled => IsRecognizing || IsLoading || IsReadingFile;
@@ -51,14 +51,14 @@ public partial class Index : IDisposable
 	private string FileValidationErrorDisplayStyle => IsInvalidFile ? "block" : "none";
 	private bool IsStartRecognitionDisabled => SelectedFile == null || IsRecognizing;
 
-	private bool IsRecognizing => SpeechRecognitionState.IsRecognizing;
+	private bool IsRecognizing => ApplicationState.IsRecognizing;
 	private bool IsReadingFile { get; set; }
 
 	protected override Task OnInitializedAsync()
 	{
 		SpeechRecognitionService.RecognitionStarted += OnRecognitionStarted;
 		SpeechRecognitionService.RecognitionCompleted += OnRecognitionCompleted;
-		SpeechRecognitionState.OnChange += OnStateChanged;
+		ApplicationState.OnChange += OnStateChanged;
 		return LoadFilesAsync();
 	}
 
@@ -66,7 +66,7 @@ public partial class Index : IDisposable
 	{
 		SpeechRecognitionService.RecognitionStarted -= OnRecognitionStarted;
 		SpeechRecognitionService.RecognitionCompleted -= OnRecognitionCompleted;
-		SpeechRecognitionState.OnChange -= OnStateChanged;
+		ApplicationState.OnChange -= OnStateChanged;
 	}
 
 	private async Task LoadFilesAsync()
@@ -80,10 +80,10 @@ public partial class Index : IDisposable
 				ApplicationFolderId = applicationFolder.Id;
 			}
 
-			if (SpeechRecognitionState.Transcripts.Count == 0)
+			if (ApplicationState.Transcripts.Count == 0)
 			{
 				var files = await OneDriveService.GetFolderItemsAsync(ApplicationFolderId);
-				SpeechRecognitionState.Transcripts = files.Select(MapDriveItemToTranscript).OrderByDescending(t => t.CreatedDateTime).ToList();
+				ApplicationState.Transcripts = files.Select(MapDriveItemToTranscript).OrderByDescending(t => t.CreatedDateTime).ToList();
 			}
 		}
 		catch (Exception ex)
@@ -240,8 +240,8 @@ public partial class Index : IDisposable
 			SelectedFile = SelectedFile,
 		};
 
-		SpeechRecognitionState.TranscriptInProgress = newTranscript;
-		SpeechRecognitionState.Transcripts = SpeechRecognitionState.Transcripts.Prepend(newTranscript).ToList();
+		ApplicationState.TranscriptInProgress = newTranscript;
+		ApplicationState.Transcripts = ApplicationState.Transcripts.Prepend(newTranscript).ToList();
 
 		ToggleTranscribeModal();
 

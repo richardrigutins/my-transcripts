@@ -23,7 +23,7 @@
         }
         else if (Transcript.Status == TranscriptStatus.Failed) {
             <div class="card-body text-danger">
-                Failed
+                Recognition failed: @Transcript.StatusMessage
             </div>
             <div class="card-footer">
                 <button class="btn btn-danger" @onclick="Remove">Remove</button>
@@ -31,11 +31,11 @@
         }
         else if (Transcript.Status == TranscriptStatus.Completed) {
             <div class="card-body">
-                Completed
+                Recognition completed!
             </div>
             <div class="card-footer">
                 <button class="btn btn-danger" @onclick="Remove">Remove</button>
-                <button class="btn btn-primary" @onclick="Save">Save</button>
+                <button class="btn btn-primary" @onclick="Save">Save to OneDrive</button>
             </div>
         }
         else {

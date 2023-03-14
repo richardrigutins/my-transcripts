@@ -1,11 +1,11 @@
-﻿@using Rigutins.MyTranscripts.Server.Pages;
-@using Rigutins.MyTranscripts.Server.Toasts;
+﻿@using Rigutins.MyTranscripts.Server.Pages
+@using Rigutins.MyTranscripts.Server.Toasts
 
 @implements IDisposable
 
 @inject ISpeechRecognitionService SpeechRecognitionService
 
-<CascadingValue Value="@SpeechRecognitionState">
+<CascadingValue Value="@ApplicationState">
     <CascadingValue Value="@ToastState">
         <CascadingAuthenticationState>
             <Router AppAssembly="@typeof(App).Assembly">
@@ -27,19 +27,19 @@
 
 @code {
     public ToastState ToastState { get; set; } = new();
-    public SpeechRecognitionState SpeechRecognitionState { get; set; } = new();
+    public ApplicationState ApplicationState { get; set; } = new();
 
     protected override void OnInitialized() {
-        SpeechRecognitionService.RecognitionStarted += SpeechRecognitionState.OnRecognitionStarted;
-        SpeechRecognitionService.RecognitionCompleted += SpeechRecognitionState.OnRecognitionCompleted;
-        SpeechRecognitionService.SentenceRecognized += SpeechRecognitionState.OnSentenceRecognized;
-        SpeechRecognitionService.CompletionPercentageChanged += SpeechRecognitionState.OnCompletionPercentageChanged;
+        SpeechRecognitionService.RecognitionStarted += ApplicationState.OnRecognitionStarted;
+        SpeechRecognitionService.RecognitionCompleted += ApplicationState.OnRecognitionCompleted;
+        SpeechRecognitionService.SentenceRecognized += ApplicationState.OnSentenceRecognized;
+        SpeechRecognitionService.CompletionPercentageChanged += ApplicationState.OnCompletionPercentageChanged;
     }
 
     public void Dispose() {
-        SpeechRecognitionService.RecognitionStarted -= SpeechRecognitionState.OnRecognitionStarted;
-        SpeechRecognitionService.RecognitionCompleted -= SpeechRecognitionState.OnRecognitionCompleted;
-        SpeechRecognitionService.SentenceRecognized -= SpeechRecognitionState.OnSentenceRecognized;
-        SpeechRecognitionService.CompletionPercentageChanged -= SpeechRecognitionState.OnCompletionPercentageChanged;
+        SpeechRecognitionService.RecognitionStarted -= ApplicationState.OnRecognitionStarted;
+        SpeechRecognitionService.RecognitionCompleted -= ApplicationState.OnRecognitionCompleted;
+        SpeechRecognitionService.SentenceRecognized -= ApplicationState.OnSentenceRecognized;
+        SpeechRecognitionService.CompletionPercentageChanged -= ApplicationState.OnCompletionPercentageChanged;
     }
 }

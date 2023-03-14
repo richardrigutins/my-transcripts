@@ -23,6 +23,11 @@ public class AzureSpeechRecognitionService : ISpeechRecognitionService
 
 	public async Task<SpeechRecognitionResult> RecognizeAsync(Stream stream, string language)
 	{
+		if (IsExecuting)
+		{
+			throw new InvalidOperationException("Speech recognition is already executing.");
+		}
+
 		SpeechRecognitionResult result = new()
 		{
 			Reason = SpeechRecognitionResultReason.Success,
@@ -30,13 +35,6 @@ public class AzureSpeechRecognitionService : ISpeechRecognitionService
 
 		try
 		{
-			if (IsExecuting)
-			{
-				result.Reason = SpeechRecognitionResultReason.Error;
-				result.ErrorMessage = "Speech recognition is already executing.";
-				return result;
-			}
-
 			var speechConfig = SpeechConfig.FromSubscription(_options.SubscriptionKey, _options.Region);
 			speechConfig.SpeechRecognitionLanguage = language;
 

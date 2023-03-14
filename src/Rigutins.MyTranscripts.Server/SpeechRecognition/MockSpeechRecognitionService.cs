@@ -16,34 +16,40 @@ public class MockSpeechRecognitionService : ISpeechRecognitionService
 	{
 		if (IsExecuting)
 		{
-			return new SpeechRecognitionResult
-			{
-				Reason = SpeechRecognitionResultReason.Error,
-				ErrorMessage = "Speech recognition is already executing.",
-			};
+			throw new InvalidOperationException("Speech recognition is already executing.");
 		}
 
-		IsExecuting = true;
-		RecognitionStarted?.Invoke();
-
-		var intervalLength = TotalTime / NumberOfIntervals;
-		double percentageSteps = 100 / NumberOfIntervals;
-		int percentage = 0;
-		for (int i = 0; i < NumberOfIntervals; i++)
-		{
-			await Task.Delay(intervalLength);
-			percentage += (int)percentageSteps;
-			CompletionPercentageChanged?.Invoke(percentage);
-			SentenceRecognized?.Invoke(Guid.NewGuid().ToString());
-		}
-
-		IsExecuting = false;
 		SpeechRecognitionResult result = new()
 		{
 			Reason = SpeechRecognitionResultReason.Success,
 		};
 
-		RecognitionCompleted?.Invoke(result);
+		try
+		{
+			IsExecuting = true;
+			RecognitionStarted?.Invoke();
+
+			var intervalLength = TotalTime / NumberOfIntervals;
+			double percentageSteps = 100 / NumberOfIntervals;
+			int percentage = 0;
+			for (int i = 0; i < NumberOfIntervals; i++)
+			{
+				await Task.Delay(intervalLength);
+				percentage += (int)percentageSteps;
+				CompletionPercentageChanged?.Invoke(percentage);
+				SentenceRecognized?.Invoke(Guid.NewGuid().ToString());
+			}
+		}
+		catch (Exception ex)
+		{
+			result.Reason = SpeechRecognitionResultReason.Error;
+			result.ErrorMessage = ex.Message;
+		}
+		finally
+		{
+			IsExecuting = false;
+			RecognitionCompleted?.Invoke(result);
+		}
 
 		return result;
 	}

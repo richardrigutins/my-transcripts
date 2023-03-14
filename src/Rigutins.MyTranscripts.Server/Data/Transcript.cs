@@ -9,7 +9,8 @@ public class Transcript
 	public string? OneDriveUrl { get; set; }
 	public DateTimeOffset? CreatedDateTime { get; set; }
 	public TranscriptStatus Status { get; set; }
-	public string Language { get; set; } = "";
+	public string StatusMessage { get; set; } = string.Empty;
+	public string Language { get; set; } = string.Empty;
 	public IBrowserFile? SelectedFile { get; set; }
 	public int ProgressPercentage { get; set; }
 	public List<string> RecognizedSentences { get; set; } = new();

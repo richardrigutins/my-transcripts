@@ -1,8 +1,9 @@
 ﻿using Rigutins.MyTranscripts.Server.Data;
+using Rigutins.MyTranscripts.Server.SpeechRecognition;
 
-namespace Rigutins.MyTranscripts.Server.SpeechRecognition;
+namespace Rigutins.MyTranscripts.Server.State;
 
-public class SpeechRecognitionState
+public class ApplicationState
 {
 	private bool _isRecognizing;
 
@@ -72,6 +73,7 @@ public class SpeechRecognitionState
 		else
 		{
 			transcript.Status = TranscriptStatus.Failed;
+			transcript.StatusMessage = recognitionResult.ErrorMessage;
 		}
 
 		TranscriptInProgress = null;
