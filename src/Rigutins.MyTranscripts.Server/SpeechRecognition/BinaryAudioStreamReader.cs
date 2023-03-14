@@ -24,7 +24,7 @@ public class BinaryAudioStreamReader : PullAudioInputStreamCallback
 	public override int Read(byte[] dataBuffer, uint size)
 	{
 		_bytesRead += (int)size;
-		_completionPercentage = Math.Min((double)_bytesRead/_totalSize, 100);
+		_completionPercentage = Math.Min((double)_bytesRead / _totalSize, 100);
 		int newRoundedPercentage = (int)Math.Round(100 * _completionPercentage);
 		if (newRoundedPercentage != _roundedPercentage)
 		{
@@ -34,7 +34,7 @@ public class BinaryAudioStreamReader : PullAudioInputStreamCallback
 		return _reader.Read(dataBuffer, 0, (int)size);
 	}
 
-	private void OnCompletionPercentageChanged(int percentage) 
+	private void OnCompletionPercentageChanged(int percentage)
 	{
 		_roundedPercentage = percentage;
 		_completionPercentageChanged?.Invoke(percentage);

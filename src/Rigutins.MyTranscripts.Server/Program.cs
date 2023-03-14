@@ -32,7 +32,6 @@ builder.Services.AddServerSideBlazor()
 
 builder.Services.AddScoped<IUserService, GraphUserService>();
 builder.Services.AddScoped<IOneDriveService, GraphOneDriveService>();
-builder.Services.AddScoped<ITodoService, GraphTodoService>();
 builder.Services.AddSpeechRecognition(builder.Configuration.GetSection("SpeechRecognition"));
 
 var app = builder.Build();
