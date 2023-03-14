@@ -9,6 +9,7 @@ __MyTranscripts__ is a Blazor Server web application that leverages Azure Cognit
 - An [Azure Active Directory App Registration](https://docs.microsoft.com/azure/active-directory/develop/quickstart-register-app) with the following permissions:
   - `Files.ReadWrite.All` (OneDrive)
   - `User.Read` (User profile)
+  - `Tasks.ReadWrite` (To Do)
 - [OneDrive](https://onedrive.live.com/about/en-us/) account
 - (Optional) An [Azure Key Vault](https://docs.microsoft.com/azure/key-vault/general/quick-create-portal) resource
 
@@ -16,7 +17,7 @@ __MyTranscripts__ is a Blazor Server web application that leverages Azure Cognit
 
 1. Create the Azure Cognitive Services resource or Speech Services resource. Make sure to copy the key and region for later use.
 2. Create the Azure Active Directory App Registration, and create a client secret for the app registration. Make sure to copy the client ID and client secret for later use. 
-3. Add the `Files.ReadWrite.All` and `User.Read` permissions to the app registration. 
+3. Add the `Files.ReadWrite.All`, `User.Read`, and `Tasks.ReadWrite` permissions to the app registration. 
 4. Add the redirect URIs `http://localhost:5297/signin-oidc` and `https://localhost:7074/signin-oidc` to the app registration.
 5. (Optional) Create the Azure Key Vault resource. Make sure to copy the key vault name for later use.
 

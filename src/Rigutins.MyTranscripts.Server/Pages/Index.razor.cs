@@ -12,13 +12,16 @@ namespace Rigutins.MyTranscripts.Server.Pages;
 public partial class Index : IDisposable
 {
 	[Inject]
-	IOneDriveService OneDriveService { get; init; } = default!;
+	private IOneDriveService OneDriveService { get; init; } = default!;
 
 	[Inject]
-	ISpeechRecognitionService SpeechRecognitionService { get; init; } = default!;
+	private ITodoService TodoService { get; init; } = default!;
 
 	[Inject]
-	ILogger<Index> Logger { get; init; } = default!;
+	private ISpeechRecognitionService SpeechRecognitionService { get; init; } = default!;
+
+	[Inject]
+	private ILogger<Index> Logger { get; init; } = default!;
 
 	private string? ApplicationFolderId { get => ApplicationState.ApplicationFolderId; set => ApplicationState.ApplicationFolderId = value; }
 	private List<Transcript> Transcripts => ApplicationState.Transcripts;
@@ -165,6 +168,8 @@ public partial class Index : IDisposable
 			var fileName = FormatName();
 			var fileContent = SelectedTranscript.RecognizedSentences;
 			var selectedTranscriptId = SelectedTranscript.Id;
+			bool createReminder = SaveFileFormModel.SetReminder;
+			DateTime? reminderDate = SaveFileFormModel.ReminderDate;
 			ToggleSaveModal();
 
 			using var stream = new MemoryStream(Encoding.UTF8.GetBytes(string.Join(Environment.NewLine, fileContent)));
@@ -172,6 +177,12 @@ public partial class Index : IDisposable
 			Transcripts.RemoveAll(t => t.Id == selectedTranscriptId);
 			var savedTranscript = MapDriveItemToTranscript(saveResult);
 			Transcripts.Add(savedTranscript);
+
+			if (createReminder && reminderDate.HasValue)
+			{
+				string reminderTitle = $"Review {fileName} transcript";
+				await CreateReminder(reminderTitle, reminderDate.Value);
+			}
 
 			ToastState.ShowToast("Saved transcript");
 			SelectedTranscript = null;
@@ -197,6 +208,13 @@ public partial class Index : IDisposable
 		fileNameWithoutExtension = fileNameWithoutExtension.Trim();
 
 		return fileNameWithoutExtension + ".txt";
+	}
+
+	private async Task CreateReminder(string title, DateTime date)
+	{
+		// Save the reminder to To Do
+		var applicationTaskList = await TodoService.GetApplicationTaskListAsync();
+		await TodoService.CreateTaskAsync(applicationTaskList.Id, title, date.ToUniversalTime());
 	}
 
 	private void ConfirmDeleteTranscript(Transcript transcript)

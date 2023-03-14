@@ -18,7 +18,7 @@
                 <InputCheckbox @bind-Value="Model.SetReminder" aria-label="Set reminder" />
             </div>
         </div>
-        <InputDate id="set-reminder" class="form-control" @bind-Value="Model.ReminderDate" disabled="@(!Model.SetReminder)" />
+        <input type="datetime-local" id="set-reminder" class="form-control" @bind="Model.ReminderDate" disabled="@(!Model.SetReminder)" />
     </div>
     <ValidationMessage For="() => Model.ReminderDate" class="text-danger" />
 </div>
