@@ -1,0 +1,85 @@
+﻿@using Rigutins.MyTranscripts.Server.Data;
+
+@if (Transcript != null) {
+    <div class="card shadow">
+        <div class="card-header">
+            <h5 class="card-title">@Transcript.Name</h5>
+        </div>
+        @if (Transcript.Status == TranscriptStatus.InProgress) {
+            <div class="card-body">
+                <Spinner ColorClass="text-primary" Size="40px" />
+            </div>
+            <div class="card-footer">
+                Progress: @Transcript.ProgressPercentage%
+            </div>
+        }
+        else if (Transcript.Status == TranscriptStatus.Uploading) {
+            <div class="card-body">
+                <Spinner ColorClass="text-primary" Size="40px" />
+            </div>
+            <div class="card-footer">
+                Uploading...
+            </div>
+        }
+        else if (Transcript.Status == TranscriptStatus.Failed) {
+            <div class="card-body text-danger">
+                Recognition failed: @Transcript.StatusMessage
+            </div>
+            <div class="card-footer">
+                <button class="btn btn-danger" @onclick="Remove">Remove</button>
+            </div>
+        }
+        else if (Transcript.Status == TranscriptStatus.Completed) {
+            <div class="card-body">
+                Recognition completed!
+            </div>
+            <div class="card-footer">
+                <button class="btn btn-danger" @onclick="Remove">Remove</button>
+                <button class="btn btn-primary" @onclick="Save">Save to OneDrive</button>
+            </div>
+        }
+        else {
+            <div class="card-body">
+                Generated on @FormatCreatedDateTime(Transcript.CreatedDateTime)
+            </div>
+            <div class="card-footer">
+                <a href="@Transcript.OneDriveUrl" class="btn btn-primary text-decoration-none" target="_blank">Open in OneDrive</a>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    [Parameter]
+    public Transcript? Transcript { get; set; }
+
+    [Parameter]
+    public Action<Transcript>? OnSave { get; set; }
+
+    [Parameter]
+    public Action<Transcript>? OnRemove { get; set; }
+
+    private string FormatCreatedDateTime(DateTimeOffset? createdDateTime) {
+        if (createdDateTime == null) {
+            return string.Empty;
+        }
+
+        return createdDateTime.Value.ToString("yyyy-MM-dd HH:mm");
+    }
+
+    private void Save() {
+        if (Transcript == null) {
+            return;
+        }
+
+        OnSave?.Invoke(Transcript);
+    }
+
+    private void Remove() {
+        if (Transcript == null) {
+            return;
+        }
+
+        OnRemove?.Invoke(Transcript);
+    }
+}

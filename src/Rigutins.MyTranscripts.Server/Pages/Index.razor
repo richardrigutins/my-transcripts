@@ -1,0 +1,110 @@
+﻿@page "/"
+
+@using Rigutins.MyTranscripts.Server.Data;
+
+@inherits StatefulComponentBase
+
+<PageTitle>MyTranscripts</PageTitle>
+
+<div class="py-2">
+    <h1 class="fw-bold mb-4">
+        My transcripts
+    </h1>
+
+    @if (IsLoading)
+    {
+        <div class="row py-5">
+            <Spinner ColorClass="text-primary" Size="40px" />
+        </div>
+    }
+    else
+    {
+        <TranscriptsList Transcripts="OrderedTranscripts" OnSaveTranscript="StartSaveTranscript"
+                     OnRemoveTranscript="RemoveTranscript" />
+    }
+
+    <div class="position-fixed sticky-bottom m-5" style="bottom: 0; right: 0;">
+        <button type="button" class="btn btn-primary btn-lg rounded-circle" style="height: 60px; width:60px;"
+                @onclick="ToggleTranscribeModal" disabled="@IsFabDisabled">
+            <i class="oi oi-plus" aria-hidden="true" data-content="transcribe"></i>
+        </button>
+    </div>
+
+    <div class="modal-backdrop fade @OverlayClass" style="display: @OverlayDisplayType" role="dialog"
+         aria-hidden="@OverlayIsHidden">
+    </div>
+
+    <div class="@TranscribeModalClass" style="display:@TranscribeModalDisplayType" tabindex="-1" role="dialog"
+         aria-hidden="@TranscribeModalIsHidden">
+        <div class="modal-dialog modal-dialog-responsive" role="document">
+            <div class="modal-content container">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        Transcribe
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                            @onclick="ToggleTranscribeModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <p>Generate a transcript by uploading your audio file and selecting the language.</p>
+                    </div>
+                    <div class="row">
+                        <WarningAlert Title="Note:" Body="Only .wav files are supported at the moment." />
+                    </div>
+                    <div class="input-group mb-3">
+                        <select class="form-select" aria-label="Select language" @bind="SelectedLanguage">
+                            @foreach (var language in Language.Languages)
+                            {
+                                <option value="@language.Key">@language.Value</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="input-group has-validation">
+                        <InputFile class="form-control" OnChange="OnInputFileChange" @key=@(InputFileId)
+                                   accept="audio/wav" required />
+                        <div class="invalid-feedback" style="display: @FileValidationErrorDisplayStyle">
+                            Please select a valid file.
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" @onclick="StartRecognition"
+                            disabled="@IsStartRecognitionDisabled">
+                        Start
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="@SaveModalClass" style="display:@SaveModalDisplayType" tabindex="4" role="dialog"
+         aria-hidden="@SaveModalIsHidden">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content container">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        Save
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                            @onclick="ToggleSaveModal"></button>
+                </div>
+                <EditForm Model="SaveFileFormModel" OnValidSubmit="SaveTranscript">
+                    <div class="modal-body">
+                        <SaveFileFormInputs Model="SaveFileFormModel" />
+
+                        <FluentValidator TValidator="SaveFileFormDataFluentValidator" />
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary" data-dismiss="modal"
+                                disabled="@IsSaveTranscriptDisabled">
+                            Save
+                        </button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+
+<NavigationLock ConfirmExternalNavigation="ConfirmExternalNavigation" />

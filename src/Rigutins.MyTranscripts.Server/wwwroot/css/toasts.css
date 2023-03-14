@@ -1,0 +1,141 @@
+﻿.blazor-toast-container {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    z-index: 3;
+}
+
+.position-topleft,
+.position-topright,
+.position-topcenter {
+    top: 0;
+}
+
+.position-bottomleft,
+.position-bottomright,
+.position-bottomcenter {
+    bottom: 0;
+}
+
+.blazor-toast {
+    display: flex;
+    flex-direction: row;
+    animation: fadein 0.5s;
+    margin-bottom: 1rem;
+    padding: 1rem 1.25rem;
+    color: #fff;
+    width: 100vw;
+    box-shadow: rgba(0,0,0,0.25) 0px 10px 40px;
+}
+
+.blazor-toast-info {
+    background-color: var(--bs-info);
+}
+
+.blazor-toast-success {
+    background-color: var(--bs-success);
+}
+
+.blazor-toast-warning {
+    background-color: var(--bs-warning);
+}
+
+.blazor-toast-error {
+    background-color: var(--bs-danger);
+}
+
+.blazor-toast-light {
+    background-color: var(--bs-light);
+}
+
+.blazor-toast-dark {
+    background-color: var(--bs-dark);
+}
+
+    .blazor-toast-dark .blazor-toast-icon {
+        color: var(--bs-light);
+    }
+
+.blazor-toast-icon {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 1rem 0 0;
+    font-size: 2.5rem;
+}
+
+.blazor-toast-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+    .blazor-toast-body .blazor-toast-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+    }
+
+        .blazor-toast-body .blazor-toast-header h5 {
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 1.5rem;
+            margin-bottom: 0;
+            line-height: 32px;
+        }
+
+    .blazor-toast-body p {
+        margin-bottom: 0;
+        font-size: 1rem;
+        vertical-align: middle;
+    }
+
+@keyframes fadein {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@media (min-width: 576px) {
+
+    .position-topleft {
+        top: 2rem;
+        left: 2rem;
+    }
+
+    .position-topright {
+        top: 2rem;
+        right: 2rem;
+    }
+
+    .position-topcenter {
+        top: 2rem;
+        left: 50%;
+        margin-left: -15rem;
+    }
+
+    .position-bottomleft {
+        bottom: 2rem;
+        left: 2rem;
+    }
+
+    .position-bottomright {
+        bottom: 2rem;
+        right: 2rem;
+    }
+
+    .position-bottomcenter {
+        bottom: 2rem;
+        left: 50%;
+        margin-left: -15rem;
+    }
+
+    .blazor-toast {
+        width: 30rem;
+        border-radius: .25rem;
+    }
+}

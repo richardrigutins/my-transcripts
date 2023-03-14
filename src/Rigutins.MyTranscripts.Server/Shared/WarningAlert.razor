@@ -1,0 +1,12 @@
+﻿<div class="alert alert-warning">
+    <strong>@Title</strong>
+    @Body
+</div>
+
+@code {
+    [Parameter]
+    public string? Title { get; set; }
+
+    [Parameter]
+    public string? Body { get; set; }
+}

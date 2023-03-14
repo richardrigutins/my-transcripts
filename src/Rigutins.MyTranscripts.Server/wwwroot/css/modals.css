@@ -1,0 +1,83 @@
+﻿/* Show the modal on the bottom of the screen */
+@media (max-width: 575.98px) {
+    .modal-dialog-responsive {
+        -webkit-transform: translate3d(0%, 0, 0);
+        -ms-transform: translate3d(0%, 0, 0);
+        -o-transform: translate3d(0%, 0, 0);
+        transform: translate3d(0%, 0, 0);
+        position: fixed;
+        margin: auto;
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+        .modal-dialog-responsive .modal-content {
+            height: auto;
+            overflow-y: auto;
+        }
+
+        .modal-dialog-responsive .modal-body {
+            padding: 15px 15px;
+        }
+
+    .modal.fade .modal-dialog-responsive {
+        bottom: -100%;
+        -webkit-transition: opacity 0.3s linear, bottom 0.3s ease-out;
+        -moz-transition: opacity 0.3s linear, bottom 0.3s ease-out;
+        -o-transition: opacity 0.3s linear, bottom 0.3s ease-out;
+        transition: opacity 0.3s linear, bottom 0.3s ease-out;
+    }
+
+    .modal.fade.show .modal-dialog-responsive {
+        bottom: 0;
+    }
+}
+
+/* Show the modal in the center of the screen */
+@media (min-width: 576px) {
+    .modal-dialog-responsive {
+        -webkit-transform: translate3d(-50%, -50%, 0);
+        -ms-transform: translate3d(-50%, -50%, 0);
+        -o-transform: translate3d(-50%, -50%, 0);
+        transform: translate3d(-50%, -50%, 0);
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        margin: auto;
+        width: 100%;
+        max-width: 600px;
+        height: auto;
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+        .modal-dialog-responsive .modal-content {
+            height: auto;
+            overflow-y: auto;
+        }
+
+        .modal-dialog-responsive .modal-body {
+            padding: 15px 15px;
+        }
+
+    .modal.fade .modal-dialog-responsive {
+        -webkit-transform: translate3d(-50%, -50%, 0) scale(0.9);
+        -ms-transform: translate3d(-50%, -50%, 0) scale(0.9);
+        -o-transform: translate3d(-50%, -50%, 0) scale(0.9);
+        transform: translate3d(-50%, -50%, 0) scale(0.9);
+        -webkit-transition: opacity 0.3s linear, -webkit-transform 0.3s ease-out;
+        -moz-transition: opacity 0.3s linear, -moz-transform 0.3s ease-out;
+        -o-transition: opacity 0.3s linear, -o-transform 0.3s ease-out;
+        transition: opacity 0.3s linear, transform 0.3s ease-out;
+    }
+
+    .modal.fade.show .modal-dialog-responsive {
+        -webkit-transform: translate3d(-50%, -50%, 0) scale(1);
+        -ms-transform: translate3d(-50%, -50%, 0) scale(1);
+        -o-transform: translate3d(-50%, -50%, 0) scale(1);
+        transform: translate3d(-50%, -50%, 0) scale(1);
+    }
+}

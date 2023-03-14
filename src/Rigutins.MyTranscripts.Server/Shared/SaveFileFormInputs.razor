@@ -1,0 +1,14 @@
+﻿@using Rigutins.MyTranscripts.Server.Data;
+
+<div class="input-group">
+    <InputText class="form-control" placeholder="File name" @bind-Value="Model.Name" required />
+    <div class="input-group-append">
+        <span class="input-group-text">.txt</span>
+    </div>
+</div>
+<ValidationMessage For="() => Model.Name" class="text-danger" />
+
+@code {
+    [Parameter]
+    public SaveFileFormData Model { get; set; } = new();
+}

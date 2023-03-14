@@ -1,0 +1,71 @@
+﻿@using Rigutins.MyTranscripts.Server.Services;
+@using Microsoft.Identity.Web
+@using Microsoft.Graph
+
+@inject IUserService UserService
+@inject MicrosoftIdentityConsentAndConditionalAccessHandler ConsentHandler
+
+<AuthorizeView>
+    <Authorized>
+        <div class="dropdown">
+            <button class="btn" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown"
+                    data-bs-display="static" aria-haspopup="true" aria-expanded="@IsExpanded" @onclick="ToggleMenu">
+                <ProfilePicture />
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-lg-start @ShowNotificationsClass"
+                aria-labelledby="dropdownMenuButton"
+                style="position: absolute; top: 50px; right: 0rem;">
+                <li>
+                    <h6 class="dropdown-header">
+                        Signed in as
+                        <b>@UserName</b>
+                        </h6>
+                </li>
+                <li>
+                    <h6 class="dropdown-header">@UserEmail</h6>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li class="dropdown-item"><a class="text-dark text-decoration-none" href="MicrosoftIdentity/Account/SignOut">Log out</a></li>
+            </ul>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <a href="MicrosoftIdentity/Account/SignIn">Log in</a>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    User? user;
+    string profileImage = string.Empty;
+    string UserName => user == null ? string.Empty : user.DisplayName;
+    string UserEmail => user == null ? string.Empty : GetUserEmail(user);
+
+    private bool IsExpanded { get; set; } = false;
+    private string ShowNotificationsClass => IsExpanded ? "show" : "";
+
+    private void ToggleMenu() {
+        IsExpanded = !IsExpanded;
+    }
+
+    private string GetUserEmail(User user) {
+        if (!string.IsNullOrEmpty(user.Mail)) {
+            return user.Mail;
+        }
+        else if (!string.IsNullOrEmpty(user.UserPrincipalName)) {
+            return user.UserPrincipalName;
+        }
+        else {
+            return string.Empty;
+        }
+    }
+
+    protected override async Task OnInitializedAsync() {
+        try {
+            user = await UserService.GetMyUserDetailsAsync();
+            profileImage = await UserService.GetProfilePictureAsync();
+        }
+        catch (Exception ex) {
+            ConsentHandler.HandleException(ex);
+        }
+    }
+}
