@@ -5,10 +5,11 @@ namespace Rigutins.MyTranscripts.Server.SpeechRecognition;
 public class BinaryAudioStreamReader : PullAudioInputStreamCallback
 {
 	private readonly BinaryReader _reader;
+	private readonly long _totalSize;
+
 	private long _bytesRead;
-	private long _totalSize;
-	private double _completionPercentage;
-	private int _roundedPercentage;
+	private double _readRatio;
+	private int _percentage;
 	private event Action<int>? _completionPercentageChanged;
 
 	public BinaryAudioStreamReader(BinaryReader reader, long totalSize, Action<int>? completionPercentageChanged = null)
@@ -16,19 +17,19 @@ public class BinaryAudioStreamReader : PullAudioInputStreamCallback
 		_reader = reader;
 		_totalSize = totalSize;
 		_bytesRead = 0;
-		_completionPercentage = 0;
-		_roundedPercentage = 0;
+		_readRatio = 0;
+		_percentage = 0;
 		_completionPercentageChanged = completionPercentageChanged;
 	}
 
 	public override int Read(byte[] dataBuffer, uint size)
 	{
 		_bytesRead += (int)size;
-		_completionPercentage = Math.Min((double)_bytesRead / _totalSize, 100);
-		int newRoundedPercentage = (int)Math.Round(100 * _completionPercentage);
-		if (newRoundedPercentage != _roundedPercentage)
+		_readRatio = Math.Min((double)_bytesRead / _totalSize, 1);
+		int newPercentage = (int)Math.Round(100 * _readRatio);
+		if (newPercentage != _percentage)
 		{
-			OnCompletionPercentageChanged(newRoundedPercentage);
+			OnCompletionPercentageChanged(newPercentage);
 		}
 
 		return _reader.Read(dataBuffer, 0, (int)size);
@@ -36,7 +37,7 @@ public class BinaryAudioStreamReader : PullAudioInputStreamCallback
 
 	private void OnCompletionPercentageChanged(int percentage)
 	{
-		_roundedPercentage = percentage;
+		_percentage = percentage;
 		_completionPercentageChanged?.Invoke(percentage);
 	}
 }
