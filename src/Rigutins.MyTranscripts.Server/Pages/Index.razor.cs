@@ -11,13 +11,6 @@ namespace Rigutins.MyTranscripts.Server.Pages;
 
 public partial class Index : IDisposable
 {
-	private const int MaxFileNameLength = 50; // Max file name length in OneDrive
-											  // Invalid characters for file name
-	private static readonly List<char> InvalidCharacters = new()
-	{
-		'<', '>', ':', '"', '/', '\\', '|', '?', '*'
-	};
-
 	[Inject]
 	IOneDriveService OneDriveService { get; init; } = default!;
 
@@ -47,9 +40,9 @@ public partial class Index : IDisposable
 	private string SaveModalClass => ShowSaveModal ? "modal fade show" : "modal fade";
 	private string SaveModalDisplayType => ShowSaveModal ? "block" : "none";
 	private bool SaveModalIsHidden => !ShowSaveModal;
-	private string SaveFileName { get; set; } = string.Empty;
+	private SaveFileFormData SaveFileFormModel { get; set; } = new();
 	private Transcript? SelectedTranscript { get; set; }
-	private bool IsSaveTranscriptDisabled => string.IsNullOrWhiteSpace(SaveFileName) || SaveFileName.Any(c => InvalidCharacters.Contains(c)) || IsLoading || SaveFileName.Length > MaxFileNameLength;
+	private bool IsSaveTranscriptDisabled => IsLoading;
 
 	private string InputFileId { get; set; } = Guid.NewGuid().ToString();
 	private IBrowserFile? SelectedFile { get; set; }
@@ -126,7 +119,7 @@ public partial class Index : IDisposable
 
 	private void ToggleSaveModal()
 	{
-		SaveFileName = string.Empty;
+		SaveFileFormModel = new();
 		ShowSaveModal = !ShowSaveModal;
 		if (!ShowSaveModal)
 		{
@@ -158,7 +151,7 @@ public partial class Index : IDisposable
 			}
 
 			IsLoading = true;
-			var fileName = FormatName(SaveFileName);
+			var fileName = FormatName();
 			var fileContent = SelectedTranscript.RecognizedSentences;
 			var selectedTranscriptId = SelectedTranscript.Id;
 			ToggleSaveModal();
@@ -184,13 +177,10 @@ public partial class Index : IDisposable
 		}
 	}
 
-	private string FormatName(string name)
+	private string FormatName()
 	{
+		var name = SaveFileFormModel.Name;
 		var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(name);
-		if (fileNameWithoutExtension.Length > MaxFileNameLength)
-		{
-			fileNameWithoutExtension = fileNameWithoutExtension.Substring(0, MaxFileNameLength);
-		}
 
 		// remove whitespaces
 		fileNameWithoutExtension = fileNameWithoutExtension.Trim();
