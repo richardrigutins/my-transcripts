@@ -20,7 +20,7 @@ public partial class Index : IDisposable
 	[Inject]
 	ILogger<Index> Logger { get; init; } = default!;
 
-	private DriveItem? ApplicationFolder { get; set; }
+	private string? ApplicationFolderId { get => SpeechRecognitionState.ApplicationFolderId; set => SpeechRecognitionState.ApplicationFolderId = value; }
 	private List<Transcript> Transcripts => SpeechRecognitionState.Transcripts;
 	private IOrderedEnumerable<Transcript> OrderedTranscripts => Transcripts.OrderBy(t => t.Status).ThenByDescending(t => t.CreatedDateTime);
 	private bool IsLoading { get; set; } = false;
@@ -74,10 +74,15 @@ public partial class Index : IDisposable
 		IsLoading = true;
 		try
 		{
+			if (ApplicationFolderId == null)
+			{
+				var applicationFolder = await OneDriveService.GetApplicationFolderAsync();
+				ApplicationFolderId = applicationFolder.Id;
+			}
+
 			if (SpeechRecognitionState.Transcripts.Count == 0)
 			{
-				ApplicationFolder = await OneDriveService.GetApplicationFolderAsync();
-				var files = await OneDriveService.GetFolderItemsAsync(ApplicationFolder!.Id);
+				var files = await OneDriveService.GetFolderItemsAsync(ApplicationFolderId);
 				SpeechRecognitionState.Transcripts = files.Select(MapDriveItemToTranscript).OrderByDescending(t => t.CreatedDateTime).ToList();
 			}
 		}
@@ -138,7 +143,7 @@ public partial class Index : IDisposable
 
 		try
 		{
-			if (ApplicationFolder is null)
+			if (ApplicationFolderId is null)
 			{
 				ToastState.ShowToast("Can't find folder", ToastColor.Warning);
 				return;
@@ -157,7 +162,7 @@ public partial class Index : IDisposable
 			ToggleSaveModal();
 
 			using var stream = new MemoryStream(Encoding.UTF8.GetBytes(string.Join(Environment.NewLine, fileContent)));
-			var saveResult = await OneDriveService.UploadFileAsync(fileName, stream, ApplicationFolder);
+			var saveResult = await OneDriveService.UploadFileAsync(fileName, stream, ApplicationFolderId);
 			Transcripts.RemoveAll(t => t.Id == selectedTranscriptId);
 			var savedTranscript = MapDriveItemToTranscript(saveResult);
 			Transcripts.Add(savedTranscript);

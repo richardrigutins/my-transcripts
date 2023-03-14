@@ -8,6 +8,6 @@ public interface IOneDriveService
 	Task<List<DriveItem>> GetFolderItemsAsync(string folderId);
 	Task<IEnumerable<DriveItem>> GetRootDriveItemsAsync();
 	Task<DriveItem> GetDriveItemAsync(string itemId);
-	Task<DriveItem> UploadFileAsync(string fileName, Stream fileStream, DriveItem parentFolder);
+	Task<DriveItem> UploadFileAsync(string fileName, Stream fileStream, string parentFolderId);
 	Task<DriveItem> GetApplicationFolderAsync();
 }

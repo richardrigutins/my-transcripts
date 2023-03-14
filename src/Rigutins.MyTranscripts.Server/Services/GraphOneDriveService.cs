@@ -84,8 +84,8 @@ public class GraphOneDriveService : IOneDriveService
 		return _graphServiceClient.Me.Drive.Items[parentFolderId].Children.Request().AddAsync(folder);
 	}
 
-	public async Task<DriveItem> UploadFileAsync(string fileName, Stream fileStream, DriveItem parentFolder)
+	public async Task<DriveItem> UploadFileAsync(string fileName, Stream fileStream, string parentFolderId)
 	{
-		return await _graphServiceClient.Me.Drive.Items[parentFolder.Id].ItemWithPath(fileName).Content.Request().PutAsync<DriveItem>(fileStream);
+		return await _graphServiceClient.Me.Drive.Items[parentFolderId].ItemWithPath(fileName).Content.Request().PutAsync<DriveItem>(fileStream);
 	}
 }

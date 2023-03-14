@@ -22,6 +22,7 @@ public class SpeechRecognitionState
 		}
 	}
 
+	public string? ApplicationFolderId { get; set; }
 	public List<Transcript> Transcripts { get; set; } = new();
 	public Transcript? TranscriptInProgress { get; set; }
 	public List<string> RecognizedSentences { get; init; } = new();
