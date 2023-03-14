@@ -42,8 +42,7 @@ __MyTranscripts__ is a Blazor Server web application that leverages Azure Cognit
 ## Current limitations
 
 - Only .wav files are supported
-- The application has only been tested with short-medium length audio files (less than 10 minutes)
-- Only supports selecting files from the local file system
+- The application has only been tested with short-medium length audio files (less than 5 minutes)
 
 ## Deploying to Azure
 
