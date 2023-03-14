@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.Graph;
+using Microsoft.JSInterop;
+using Microsoft.VisualBasic;
 using Rigutins.MyTranscripts.Server.Data;
 using Rigutins.MyTranscripts.Server.Services;
 using Rigutins.MyTranscripts.Server.SpeechRecognition;
@@ -22,6 +24,9 @@ public partial class Index : IDisposable
 
 	[Inject]
 	private ILogger<Index> Logger { get; init; } = default!;
+
+	[Inject]
+	private IJSRuntime JsRuntime { get; init; } = default!;
 
 	private string? ApplicationFolderId { get => ApplicationState.ApplicationFolderId; set => ApplicationState.ApplicationFolderId = value; }
 	private List<Transcript> Transcripts => ApplicationState.Transcripts;
@@ -212,9 +217,14 @@ public partial class Index : IDisposable
 
 	private async Task CreateReminder(string title, DateTime date)
 	{
+		// Shift the date to UTC
+		int offsetInMinutes = await JsRuntime.InvokeAsync<int>("blazorGetTimezoneOffset");
+		var offset = TimeSpan.FromMinutes(-offsetInMinutes);
+		var shiftedDate = date.ToUniversalTime() - offset;
+
 		// Save the reminder to To Do
 		var applicationTaskList = await TodoService.GetApplicationTaskListAsync();
-		await TodoService.CreateTaskAsync(applicationTaskList.Id, title, date.ToUniversalTime());
+		await TodoService.CreateTaskAsync(applicationTaskList.Id, title, shiftedDate);
 	}
 
 	private void ConfirmDeleteTranscript(Transcript transcript)
