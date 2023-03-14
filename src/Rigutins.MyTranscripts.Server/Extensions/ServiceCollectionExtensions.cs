@@ -15,10 +15,10 @@ public static class ServiceCollectionExtensions
 		services.AddOptions<SpeechRecognitionOptions>().Configure(configureOptions);
 
 		// Comment if you need to use a mock recognizer
-		services.AddScoped<ISpeechRecognitionService, AzureSpeechRecognitionService>();
+		//services.AddScoped<ISpeechRecognitionService, AzureSpeechRecognitionService>();
 
 		// Uncomment if you need to use a mock recognizer
-		//services.AddScoped<ISpeechRecognitionService, MockSpeechRecognitionService>();
+		services.AddScoped<ISpeechRecognitionService, MockSpeechRecognitionService>();
 
 		return services;
 	}

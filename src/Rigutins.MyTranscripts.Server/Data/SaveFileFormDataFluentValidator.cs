@@ -16,5 +16,7 @@ public class SaveFileFormDataFluentValidator : AbstractValidator<SaveFileFormDat
 		RuleFor(r => r.Name).NotEmpty();
 		RuleFor(r => r.Name).MaximumLength(NameMaxLength);
 		RuleFor(r => r.Name).Must(n => n.All(c => !InvalidCharacters.Contains(c))).WithMessage("Insert a valid name.");
+
+		RuleFor(r => r.ReminderDate).NotEmpty().When(r => r.SetReminder);
 	}
 }
