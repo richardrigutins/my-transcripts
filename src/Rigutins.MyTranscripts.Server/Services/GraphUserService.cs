@@ -2,6 +2,9 @@
 
 namespace Rigutins.MyTranscripts.Server.Services;
 
+/// <summary>
+/// Implementation of <see cref="IUserService"/> that uses Microsoft Graph API to interact with user data.
+/// </summary>
 public class GraphUserService : IUserService
 {
 	private readonly GraphServiceClient _client;
@@ -11,11 +14,13 @@ public class GraphUserService : IUserService
 		_client = client;
 	}
 
+	/// <inheritdoc />
 	public Task<User> GetMyUserDetailsAsync()
 	{
 		return _client.Me.Request().GetAsync();
 	}
 
+	/// <inheritdoc />
 	public async Task<string> GetProfilePictureAsync()
 	{
 		try
@@ -33,6 +38,7 @@ public class GraphUserService : IUserService
 		}
 		catch (ServiceException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
 		{
+			// User has no profile picture
 			return string.Empty;
 		}
 	}

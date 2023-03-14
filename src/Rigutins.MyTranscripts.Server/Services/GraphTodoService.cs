@@ -2,6 +2,9 @@
 
 namespace Rigutins.MyTranscripts.Server.Services;
 
+/// <summary>
+/// Implementation of <see cref="ITodoService"/> that uses Microsoft Graph API to interact with Microsoft To Do.
+/// </summary>
 public class GraphTodoService : ITodoService
 {
 	private const string TodoListName = "MyTranscripts";
@@ -13,12 +16,7 @@ public class GraphTodoService : ITodoService
 		_client = client;
 	}
 
-	public async Task<IEnumerable<TodoTask>> GetTasksAsync(string listId)
-	{
-		var toDo = await _client.Me.Todo.Lists[listId].Tasks.Request().GetAsync();
-		return toDo.CurrentPage;
-	}
-
+	/// <inheritdoc />
 	public async Task<TodoTaskList> GetApplicationTaskListAsync()
 	{
 		TodoTaskList? todoList = await GetTodoListByNameAsync(TodoListName);
@@ -30,6 +28,7 @@ public class GraphTodoService : ITodoService
 		return todoList;
 	}
 
+	/// <inheritdoc />
 	public async Task<TodoTaskList?> GetTodoListByNameAsync(string name)
 	{
 		var lists = await _client.Me.Todo.Lists.Request()
@@ -38,6 +37,7 @@ public class GraphTodoService : ITodoService
 		return lists.CurrentPage.FirstOrDefault();
 	}
 
+	/// <inheritdoc />
 	public async Task<TodoTaskList> CreateTodoListAsync(string name)
 	{
 		var list = new TodoTaskList
@@ -48,6 +48,7 @@ public class GraphTodoService : ITodoService
 		return await _client.Me.Todo.Lists.Request().AddAsync(list);
 	}
 
+	/// <inheritdoc />
 	public async Task<TodoTask> CreateTaskAsync(string listId, string name, DateTime? dueDate = null)
 	{
 		var task = new TodoTask
@@ -61,6 +62,7 @@ public class GraphTodoService : ITodoService
 			Importance = Importance.Normal,
 		};
 
+		// If a due date is specified, set the due date and reminder to the same date.kd
 		if (dueDate.HasValue)
 		{
 			task.DueDateTime = new DateTimeTimeZone

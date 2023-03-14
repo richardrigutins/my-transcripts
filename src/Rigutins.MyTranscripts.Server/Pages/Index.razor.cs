@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.Graph;
 using Microsoft.JSInterop;
-using Microsoft.VisualBasic;
 using Rigutins.MyTranscripts.Server.Data;
 using Rigutins.MyTranscripts.Server.Services;
 using Rigutins.MyTranscripts.Server.SpeechRecognition;
