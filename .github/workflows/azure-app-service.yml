@@ -3,8 +3,6 @@ on:
   push:
     branches:
     - main
-    - develop
-  workflow_dispatch:
   
 env:
   AZURE_WEBAPP_PACKAGE_PATH: src/Rigutins.MyTranscripts.Server/published
