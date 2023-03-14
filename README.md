@@ -2,21 +2,28 @@
 
 __MyTranscripts__ is a Blazor Server web application that leverages Azure Cognitive Services and Microsoft Graph to provide a simple way to transcribe audio files and store them in OneDrive.
 
+## Features
+
+- Transcribe audio files to text using Azure Cognitive Services Speech to Text
+- Store transcripts in OneDrive as .txt files using Microsoft Graph
+- Set reminders to review transcripts in Microsoft To Do using Microsoft Graph
+
 ## Prerequisites
 
 - An [Azure subscription](https://azure.microsoft.com/free/) with permissions to create the required resources
 - An [Azure Cognitive Services](https://docs.microsoft.com/azure/cognitive-services/cognitive-services-apis-create-account) resource or [Speech Services](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started) resource
 - An [Azure Active Directory App Registration](https://docs.microsoft.com/azure/active-directory/develop/quickstart-register-app) with the following permissions:
-  - `Files.ReadWrite.All` (OneDrive)
+  - `Files.ReadWrite.All` (Read and write files in OneDrive)
   - `User.Read` (User profile)
-- [OneDrive](https://onedrive.live.com/about/en-us/) account
+  - `Tasks.ReadWrite` (Read and write tasks in Microsoft To Do)
+- A Microsoft account that has access to [OneDrive](https://onedrive.live.com/about/en-us/) and [To Do](https://todo.microsoft.com/)
 - (Optional) An [Azure Key Vault](https://docs.microsoft.com/azure/key-vault/general/quick-create-portal) resource
 
 ## Azure setup
 
 1. Create the Azure Cognitive Services resource or Speech Services resource. Make sure to copy the key and region for later use.
 2. Create the Azure Active Directory App Registration, and create a client secret for the app registration. Make sure to copy the client ID and client secret for later use. 
-3. Add the `Files.ReadWrite.All` and `User.Read` permissions to the app registration. 
+3. Add the `Files.ReadWrite.All`, `User.Read`, and `Tasks.ReadWrite` permissions to the app registration. 
 4. Add the redirect URIs `http://localhost:5297/signin-oidc` and `https://localhost:7074/signin-oidc` to the app registration.
 5. (Optional) Create the Azure Key Vault resource. Make sure to copy the key vault name for later use.
 
@@ -38,6 +45,7 @@ __MyTranscripts__ is a Blazor Server web application that leverages Azure Cognit
 6. Once the transcription is complete, click the `Save` button to open the save dialog.
 7. Enter a name for the transcript.
 8. Click the `Save` button to upload the transcript to OneDrive as a .txt file.
+9. (Optional) Set a reminder to review the transcript by clicking the `Set reminder` button. The reminder will be created in Microsoft To Do.
 
 ## Current limitations
 
