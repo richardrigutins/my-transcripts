@@ -13,7 +13,8 @@ env:
   WORKING_DIRECTORY: src/Rigutins.MyTranscripts.Server
 
 jobs:
-  build:
+  build-test:
+    name: Build and test
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
